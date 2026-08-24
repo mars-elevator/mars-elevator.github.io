@@ -1,0 +1,21 @@
+{
+  "name": "MARS ELEVATOR Merkezi İzin Yönetimi",
+  "short_name": "MARS ELEVATOR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eaf2f8",
+  "theme_color": "#214d7d",
+  "icons": [
+    {
+      "src": "assets/mars_pwa_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/mars_pwa_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

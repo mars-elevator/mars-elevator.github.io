@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARS ELEVATOR - Merkezi İzin Yönetimi V23</title>
+<style>
+:root{
+  --bg:#f4f6f8; --panel:#fff; --text:#1d2a35; --muted:#6b7a88;
+  --primary:#164a7b; --primary2:#0f6aa8; --border:#dfe5ea;
+  --ok:#2e7d32; --warn:#c77800; --bad:#c62828; --soft:#eef3f7;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+.hidden{display:none!important}
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#eef4f8,#dce9f3)}
+.login-card{width:min(420px,100%);background:#fff;border:1px solid var(--border);border-radius:18px;padding:30px;box-shadow:0 18px 55px rgba(22,74,123,.13)}
+.brand{font-size:26px;font-weight:800;color:var(--primary);margin-bottom:4px}
+.brand-sub{color:var(--muted);margin-bottom:24px}
+label{font-weight:600;font-size:13px;display:block;margin:13px 0 6px}
+input,select,textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:11px 12px;background:#fff;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--primary2);box-shadow:0 0 0 3px rgba(15,106,168,.08)}
+.btn{border:0;border-radius:10px;padding:10px 15px;cursor:pointer;font-weight:700}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover{background:#103f68}
+.btn-ghost{background:var(--soft);color:var(--text)}
+.btn-danger{background:#fdeaea;color:var(--bad)}
+.btn-ok{background:#e7f4e8;color:var(--ok)}
+.demo{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.6}
+.app{min-height:100vh;display:grid;grid-template-columns:245px 1fr}
+.sidebar{background:#123e67;color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:18px}
+.logo{font-weight:900;font-size:22px;padding:8px 10px}
+.nav{display:flex;flex-direction:column;gap:6px}
+.nav button{background:transparent;border:0;color:#dce7f0;text-align:left;padding:11px 12px;border-radius:9px;cursor:pointer;font-weight:600}
+.nav button.active,.nav button:hover{background:rgba(255,255,255,.12);color:#fff}
+.side-user{margin-top:auto;border-top:1px solid rgba(255,255,255,.18);padding:14px 10px 0;font-size:13px;color:#dce7f0}
+.main{padding:26px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.topbar h1{margin:0;font-size:25px}
+.muted{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 4px 18px rgba(31,52,73,.04)}
+.stat .value{font-size:28px;font-weight:900;margin-top:7px}
+.stat .label{color:var(--muted);font-size:13px}
+.section{margin-top:18px}
+.section h2{font-size:18px;margin:0 0 12px}
+.table-wrap{overflow:auto;background:#fff;border:1px solid var(--border);border-radius:14px}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+th{background:#f8fafb;color:#53616d}
+.badge{display:inline-block;padding:5px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge.ok{background:#e8f5e9;color:var(--ok)}
+.badge.wait{background:#fff3df;color:var(--warn)}
+.badge.bad{background:#fdeaea;color:var(--bad)}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.form-actions{display:flex;gap:10px;margin-top:18px}
+.calendar-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.dayname{font-weight:800;color:#66737f;font-size:12px;text-align:center;padding:5px}
+.day{min-height:115px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px}
+.day.empty{background:transparent;border-color:transparent}
+.day .num{font-weight:800;font-size:13px}
+.event{margin-top:6px;background:#edf4fa;border-left:3px solid var(--primary2);border-radius:6px;padding:5px 6px;font-size:11px;line-height:1.25}
+.approval-card{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px}
+.approval-meta{font-size:13px;color:var(--muted);margin-top:5px}
+.approval-actions{display:flex;gap:8px}
+.clickable{cursor:pointer}
+.modal{position:fixed;inset:0;background:rgba(15,28,40,.45);display:grid;place-items:center;padding:20px;z-index:5}
+.modal-box{background:#fff;border-radius:14px;width:min(650px,100%);max-height:80vh;overflow:auto;padding:20px}
+.modal-head{display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{margin:0}
+.kv{display:grid;grid-template-columns:180px 1fr;gap:8px;font-size:14px;margin-top:14px}
+.kv div:nth-child(odd){color:var(--muted)}
+@media(max-width:950px){.cards{grid-template-columns:repeat(2,1fr)}.app{grid-template-columns:1fr}.sidebar{position:relative}.nav{display:grid;grid-template-columns:repeat(3,1fr)}.side-user{display:none}}
+@media(max-width:650px){.main{padding:16px}.cards{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.calendar{grid-template-columns:repeat(7,minmax(70px,1fr));overflow:auto}.topbar{align-items:flex-start;gap:12px;flex-direction:column}}
+
+.holiday-event{margin-top:6px;background:#fff0f0;border-left:3px solid #b42318;border-radius:6px;padding:5px 6px;font-size:11px;line-height:1.25;color:#7a271a;font-weight:700}
+.day.holiday-day{background:#fffafa;border-color:#efc9c6}
+.day.weekend{background:#fafbfc}
+.calendar-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.calendar-toolbar select{width:auto;min-width:120px;padding:8px 10px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:12px 0 4px;font-size:12px;color:var(--muted)}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:11px;height:11px;border-radius:3px;background:#edf4fa;border:1px solid #cbdceb}
+.legend-dot.holiday{background:#fff0f0;border-color:#efc9c6}
+.holiday-list{margin-top:16px;border-top:1px solid var(--border);padding-top:14px}
+.holiday-row{display:grid;grid-template-columns:120px 1fr 100px;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.holiday-row:last-child{border-bottom:0}
+@media(max-width:650px){.holiday-row{grid-template-columns:90px 1fr}.holiday-row span:last-child{grid-column:2}}
+
+
+.team-link{
+  display:inline-flex;align-items:center;gap:5px;
+  border:0;background:transparent;color:var(--primary);
+  font-weight:800;cursor:pointer;padding:6px 8px;border-radius:8px;
+}
+.team-link:hover{background:#eaf2f8;text-decoration:underline}
+.team-link.remaining{color:#17324d}
+.calendar-focus{
+  margin:0 0 14px;background:#f7fafc;border:1px solid var(--border);
+  border-radius:12px;padding:14px;
+}
+.calendar-focus-head{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+  flex-wrap:wrap;
+}
+.calendar-focus-name{font-size:17px;font-weight:900}
+.calendar-focus-stats{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.calendar-focus-stat{font-size:13px;color:var(--muted)}
+.calendar-focus-stat b{display:block;color:var(--text);font-size:16px;margin-top:2px}
+.focus-list{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.focus-chip{
+  border:1px solid var(--border);background:#fff;border-radius:999px;
+  padding:7px 10px;font-size:12px;cursor:pointer;
+}
+.focus-chip:hover{border-color:var(--primary2);background:#eef5fa}
+.event.focused-leave{outline:2px solid rgba(22,74,123,.18);font-weight:800}
+
+
+.nav button{position:relative}
+.notification-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:22px;
+  height:22px;
+  padding:0 7px;
+  margin-left:8px;
+  border-radius:999px;
+  background:#d92d20;
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+  vertical-align:middle;
+  box-shadow:0 0 0 3px rgba(217,45,32,.12);
+}
+.notification-badge.hidden{display:none!important}
+.notification-dot{
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#ff4d4f;
+  margin-right:7px;
+  animation:notifyPulse 1.5s infinite;
+}
+@keyframes notifyPulse{
+  0%{box-shadow:0 0 0 0 rgba(217,45,32,.45)}
+  70%{box-shadow:0 0 0 8px rgba(217,45,32,0)}
+  100%{box-shadow:0 0 0 0 rgba(217,45,32,0)}
+}
+.approval-alert{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  background:#fff6f5;
+  border:1px solid #f5c2bd;
+  border-left:5px solid #d92d20;
+  border-radius:12px;
+  padding:14px 16px;
+  margin-bottom:14px;
+}
+.approval-alert-title{
+  display:flex;
+  align-items:center;
+  font-weight:900;
+  color:#8f1d17;
+}
+.approval-alert-text{
+  margin-top:4px;
+  font-size:13px;
+  color:#70433f;
+}
+.approval-card.pending-attention{
+  border-left:5px solid #d92d20;
+  box-shadow:0 6px 20px rgba(217,45,32,.07);
+}
+.toast-notification{
+  position:fixed;
+  top:22px;
+  right:22px;
+  z-index:50;
+  width:min(390px,calc(100% - 44px));
+  background:#fff;
+  border:1px solid #f0b5af;
+  border-left:5px solid #d92d20;
+  border-radius:12px;
+  box-shadow:0 18px 45px rgba(17,31,44,.18);
+  padding:14px 16px;
+  transform:translateY(-12px);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s ease;
+}
+.toast-notification.show{
+  transform:translateY(0);
+  opacity:1;
+  pointer-events:auto;
+}
+.toast-title{font-weight:900;color:#8f1d17;margin-bottom:4px}
+.toast-text{font-size:13px;color:#5e6b76}
+
+
+.approval-tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+.approval-tab{
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:800;
+}
+.approval-tab.active{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+}
+.approved-person-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.approved-person-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:15px;
+  cursor:pointer;
+  transition:.18s ease;
+}
+.approved-person-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 7px 22px rgba(31,52,73,.08);
+  border-color:#c8d6e2;
+}
+.approved-person-name{
+  font-weight:900;
+  font-size:15px;
+}
+.approved-person-meta{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:12px;
+}
+.approved-person-stats{
+  display:flex;
+  gap:12px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+.approved-person-stat{
+  font-size:12px;
+  color:var(--muted);
+}
+.approved-person-stat b{
+  display:block;
+  color:var(--text);
+  font-size:14px;
+  margin-top:2px;
+}
+.history-table td{
+  vertical-align:top;
+}
+.history-note{
+  max-width:340px;
+  white-space:normal;
+}
+.section-heading-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:10px;
+}
+@media(max-width:950px){
+  .approved-person-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  .approved-person-grid{grid-template-columns:1fr}
+}
+
+
+.calendar-scope-tabs{
+  display:flex;
+  gap:8px;
+  margin:0 0 14px;
+  flex-wrap:wrap;
+}
+.calendar-scope-tab{
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--text);
+  padding:9px 13px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:800;
+}
+.calendar-scope-tab.active{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+}
+.calendar-scope-note{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+
+.sync-status{font-size:12px;color:var(--muted);margin-right:10px}
+.sync-status.error{color:var(--bad);font-weight:700}
+.request-action{border:0;background:#fdeaea;color:var(--bad);padding:7px 9px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:800}
+.revoke-btn{border:0;background:#fff3df;color:#955b00;padding:7px 9px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:800}
+.user-delete-btn{border:0;background:#fdeaea;color:var(--bad);padding:7px 9px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:800}
+.permission-note{background:#eef4fa;border:1px solid #d8e5f0;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#53616d}
+.user-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:650px){.user-grid{grid-template-columns:1fr}}
+
+
+.team-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:16px 0;
+}
+.team-summary-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px 16px;
+  box-shadow:0 8px 20px rgba(27,58,92,.04);
+}
+.team-summary-label{font-size:12px;color:var(--muted);margin-bottom:7px}
+.team-summary-value{font-size:21px;font-weight:900;color:#1d2c3b}
+.team-summary-card.special-fair{border-left:4px solid #a96a13}
+.team-summary-card.special-task{border-left:4px solid #375f8c}
+.team-table th,.team-table td{white-space:nowrap}
+.record-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 8px;
+  border-radius:999px;
+  border:0;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:800;
+  background:#eef4fa;
+  color:#234b76;
+}
+.record-pill.fair{background:#fff4df;color:#8a5700}
+.record-pill.task{background:#eaf1fb;color:#2f5d8e}
+.team-chart-head{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-end;
+  margin-bottom:14px;
+}
+.team-chart-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.team-chart-controls label{margin:0;font-size:12px;color:var(--muted)}
+.team-chart-controls select{width:auto;min-width:110px;padding:8px 10px}
+.timeline-month-head{
+  display:grid;
+  grid-template-columns:280px minmax(650px,1fr);
+  border:1px solid var(--line);
+  border-bottom:0;
+  border-radius:12px 12px 0 0;
+  overflow:hidden;
+  background:#f8fafc;
+}
+.timeline-person-head{padding:10px 12px;font-size:12px;font-weight:800;border-right:1px solid var(--line)}
+.timeline-months{display:grid;grid-template-columns:repeat(12,1fr)}
+.timeline-months span{
+  text-align:center;
+  padding:10px 2px;
+  border-right:1px solid #e8edf2;
+  font-size:11px;
+  color:#667788;
+}
+.timeline-months span:last-child{border-right:0}
+.team-timeline{
+  border:1px solid var(--line);
+  border-radius:0 0 12px 12px;
+  overflow:auto;
+  max-height:480px;
+  background:#fff;
+}
+.timeline-empty{padding:24px;text-align:center;color:var(--muted)}
+.timeline-row{
+  display:grid;
+  grid-template-columns:280px minmax(650px,1fr);
+  min-height:58px;
+  border-bottom:1px solid #edf1f5;
+}
+.timeline-row:last-child{border-bottom:0}
+.timeline-info{
+  padding:9px 12px;
+  border-right:1px solid var(--line);
+  overflow:hidden;
+}
+.timeline-name{font-size:13px;font-weight:900;color:#213244}
+.timeline-reason{
+  font-size:11px;
+  color:#657686;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-top:3px;
+}
+.timeline-track{
+  position:relative;
+  min-height:58px;
+  background-image:linear-gradient(to right, transparent calc(100% - 1px), #e9eef3 0);
+  background-size:8.333333% 100%;
+}
+.timeline-bar{
+  position:absolute;
+  top:15px;
+  height:27px;
+  min-width:7px;
+  border-radius:7px;
+  padding:5px 7px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-size:10px;
+  font-weight:800;
+  box-sizing:border-box;
+  cursor:default;
+}
+.timeline-bar.leave{background:#dbe9f7;color:#1f527f;border:1px solid #b9d3ec}
+.timeline-bar.fair{background:#fff0cf;color:#7b4d00;border:1px solid #f1d18b}
+.timeline-bar.task{background:#e3edf9;color:#2e5985;border:1px solid #bdd0e7}
+.timeline-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted)}
+.tl-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.tl-leave{background:#b9d3ec}.tl-fair{background:#f1d18b}.tl-task{background:#bdd0e7}
+@media(max-width:1200px){
+  .team-summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .team-summary-grid{grid-template-columns:1fr 1fr}
+  .team-chart-head{align-items:flex-start;flex-direction:column}
+  .timeline-month-head,.timeline-row{grid-template-columns:220px minmax(650px,1fr)}
+}
+
+
+.selection-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin:0 0 14px;
+}
+.selection-summary-item{
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:10px 12px;
+  min-height:58px;
+}
+.selection-summary-item span{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+.selection-summary-item b{
+  display:block;
+  font-size:13px;
+  color:#23384d;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.selection-summary-wide{grid-column:span 4}
+@media(max-width:1050px){
+  .selection-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .selection-summary-wide{grid-column:span 2}
+}
+@media(max-width:650px){
+  .selection-summary{grid-template-columns:1fr}
+  .selection-summary-wide{grid-column:span 1}
+}
+
+
+.timeline-bar{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+  user-select:none;
+}
+.timeline-bar:hover{
+  filter:brightness(.97);
+  box-shadow:0 2px 8px rgba(30,55,80,.18);
+  transform:translateY(-1px);
+}
+.timeline-bar-symbol{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:20px;
+  height:20px;
+  font-weight:900;
+  line-height:1;
+}
+.timeline-click-note{
+  margin-top:8px;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.gm-note{background:#f6f2ff;border:1px solid #dfd3f5;border-radius:10px;padding:10px 12px;color:#5c4777}
+
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.notification-center{position:relative;display:inline-flex}
+.notification-bell{
+  position:relative;
+  width:42px;
+  height:42px;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:19px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 4px 12px rgba(31,67,103,.05);
+}
+.notification-bell:hover{background:#f7fafe}
+.notification-bell-badge{
+  position:absolute;
+  right:-6px;
+  top:-7px;
+  min-width:20px;
+  height:20px;
+  padding:0 5px;
+  border-radius:999px;
+  background:#df382f;
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid #fff;
+  box-sizing:border-box;
+}
+.notification-panel{
+  position:absolute;
+  right:0;
+  top:50px;
+  width:390px;
+  max-height:510px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  box-shadow:0 20px 50px rgba(25,45,70,.22);
+  z-index:999;
+  overflow:hidden;
+}
+.notification-panel-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  padding:14px 15px;
+  border-bottom:1px solid var(--line);
+  background:#fbfcfd;
+}
+.notification-panel-body{max-height:390px;overflow:auto}
+.notification-empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+.notification-item{
+  display:flex;
+  gap:10px;
+  padding:12px 14px;
+  border-bottom:1px solid #edf1f4;
+  cursor:pointer;
+}
+.notification-item:last-child{border-bottom:0}
+.notification-item:hover{background:#f7fafe}
+.notification-item-icon{
+  width:34px;height:34px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 auto;font-weight:900;
+}
+.notification-item-icon.pending{background:#fff2df;color:#a65d00}
+.notification-item-icon.approved{background:#e8f6ec;color:#247a3a}
+.notification-item-icon.rejected{background:#fdeaea;color:#a62f2a}
+.notification-item-icon.revoked{background:#fff3df;color:#8a5a0a}
+.notification-item-main{min-width:0;flex:1}
+.notification-item-title{font-size:13px;font-weight:900;color:#213244}
+.notification-item-text{font-size:12px;color:#5c6c7a;margin-top:3px;line-height:1.35}
+.notification-item-time{font-size:10px;color:#8996a3;margin-top:5px}
+.notification-unread-dot{width:8px;height:8px;border-radius:50%;background:#df382f;flex:0 0 auto;margin-top:5px}
+.notification-permission{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;padding:10px 14px;background:#fff8e9;border-top:1px solid #f1dfb9;
+  font-size:11px;color:#72562d
+}
+.mini-link{
+  border:0;background:transparent;color:#24558a;font-weight:800;font-size:11px;cursor:pointer;padding:4px
+}
+.mini-link:hover{text-decoration:underline}
+@media(max-width:680px){
+  .notification-panel{position:fixed;right:12px;left:12px;top:76px;width:auto}
+  .sync-status{display:none}
+}
+
+</style>
+<script>
+window.MARS_CONFIG={
+  url:"https://jeufdlhqjoiykewcsclj.supabase.co",
+  anonKey:"sb_publishable_rPc21TdbtWwtZ80i7lo1sg_RtlzoA3V"
+};
+</script>
+<link id="appFavicon" rel="icon" type="image/x-icon" href="assets/mars_elevator.ico">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#214d7d">
+<meta name="application-name" content="MARS ELEVATOR">
+</head>
+<body>
+
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <div class="brand">MARS ELEVATOR</div>
+    <div class="brand-sub">Personel İzin Yönetim Sistemi</div>
+
+    <label>Kullanıcı Adı</label>
+    <input id="loginUser" placeholder="Kullanıcı adınızı girin">
+
+    <label>Şifre</label>
+    <input id="loginPass" type="password" placeholder="••••••••">
+
+    <button class="btn btn-primary" style="width:100%;margin-top:18px" onclick="login()">Giriş Yap</button>
+
+    <div class="demo">
+      <b>MARS ELEVATOR</b> merkezi personel izin yönetim sistemi.<br>
+      Yetkiler kullanıcı rolüne göre otomatik belirlenir.
+    </div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="logo">MARS ELEVATOR</div>
+    <div class="nav">
+      <button data-page="dashboard" onclick="showPage('dashboard')">⌂ Ana Sayfa</button>
+      <button data-page="request" id="requestNav" onclick="showPage('request')">＋ İzin Talebi</button>
+      <button data-page="calendar" onclick="showPage('calendar')">▣ İzin Takvimi</button>
+      <button data-page="approvals" id="approvalNav" onclick="showPage('approvals')">
+        ✓ <span id="approvalNavText">Müdür Onayları</span> <span id="approvalBadge" class="notification-badge hidden">0</span>
+      </button>
+      <button data-page="team" id="teamNav" onclick="showPage('team')">♙ <span id="teamNavText">Ekibim</span></button>
+      <button data-page="users" id="usersNav" onclick="showPage('users')">⚙ Kullanıcı Yönetimi</button>
+    </div>
+    <div class="side-user">
+      <div id="sideName" style="font-weight:800"></div>
+      <div id="sideRole"></div>
+      <button class="btn btn-ghost" style="margin-top:12px;width:100%" onclick="logout()">Çıkış</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle">Ana Sayfa</h1>
+        <div class="muted" id="welcome"></div>
+      </div>
+      <div class="topbar-actions">
+        <span id="syncStatus" class="sync-status">Merkezi veri</span>
+        <div class="notification-center">
+          <button id="notificationBell" class="notification-bell" onclick="toggleNotificationPanel(event)" title="Bildirimler">
+            🔔
+            <span id="globalNotificationBadge" class="notification-bell-badge hidden">0</span>
+          </button>
+          <div id="notificationPanel" class="notification-panel hidden">
+            <div class="notification-panel-head">
+              <div>
+                <b>Bildirimler</b>
+                <div id="notificationPanelSubtitle" class="muted" style="font-size:11px;margin-top:2px">Yeni bildirim bulunmuyor</div>
+              </div>
+              <button id="markAllNotificationsBtn" class="mini-link hidden" onclick="markAllPersonalNotificationsRead(event)">Tümünü okundu say</button>
+            </div>
+            <div id="notificationPanelBody" class="notification-panel-body"></div>
+            <div id="notificationPermissionArea" class="notification-permission hidden">
+              <span id="notificationPermissionText">Windows bildirimleri kapalı.</span>
+              <button id="notificationPermissionBtn" class="mini-link" onclick="requestDesktopNotificationPermission(event)">Etkinleştir</button>
+            </div>
+            <div id="notificationTestArea" class="notification-permission hidden">
+              <span id="notificationTestText">Windows bildirimleri açık.</span>
+              <button class="mini-link" onclick="sendTestDesktopNotification(event)">Yerel Test</button>
+            </div>
+          </div>
+        </div>
+        <button id="newRequestTopBtn" class="btn btn-primary" onclick="showPage('request')">+ Yeni İzin Talebi</button>
+      </div>
+    </div>
+
+    <section id="page-dashboard">
+      <div class="cards">
+        <div class="card stat clickable" onclick="openLeaveDetail('annual')">
+          <div class="label">Yıllık Ücretli İzin Hakkı</div><div class="value" id="annualEnt">14 Gün</div>
+        </div>
+        <div class="card stat clickable" onclick="openLeaveDetail('used')">
+          <div class="label">Kullanılan Yıllık Ücretli İzin</div><div class="value" id="annualUsed">0 Gün</div>
+        </div>
+        <div class="card stat">
+          <div class="label">Kalan Yıllık Ücretli İzin</div><div class="value" id="annualRemaining">14 Gün</div>
+        </div>
+        <div class="card stat clickable" onclick="openLeaveDetail('hourly')">
+          <div class="label">Kullanılan Saatlik İzin</div><div class="value" id="hourlyUsed">0 Saat</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Diğer İzin / Kayıt Özeti</h2>
+        <div class="cards">
+          <div class="card stat clickable" onclick="openLeaveDetail('health')">
+            <div class="label">Sağlık Raporu</div><div class="value" id="healthUsed">0 İş Günü</div>
+          </div>
+          <div class="card stat clickable" onclick="openLeaveDetail('admin')">
+            <div class="label">İdari İzin</div><div class="value" id="adminUsed">0 İş Günü</div>
+          </div>
+          <div class="card stat clickable" onclick="openLeaveDetail('travel')">
+            <div class="label">İş Seyahati</div><div class="value" id="travelUsed">0 İş Günü</div>
+          </div>
+          <div class="card stat clickable" onclick="openLeaveDetail('hourly')">
+            <div class="label">Saatlik İzin</div><div class="value" id="hourlyInfoUsed">0 Saat</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 id="myRequestsTitle">Son İzin Taleplerim</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>İzin Türü</th><th>Tarih</th><th>Süre</th><th>Durum</th><th>İşlem</th></tr></thead>
+            <tbody id="myRequestsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-request" class="hidden">
+      <div class="card">
+        <h2 id="requestHeading" style="margin-top:0">Yeni İzin Talebi</h2>
+        <div id="leavePolicyInfo" style="background:#eef4fa;border:1px solid #d8e6f1;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:#425466"></div>
+        <div class="form-grid">
+          <div>
+            <label>İzin / Kayıt Türü</label>
+            <select id="leaveType" onchange="toggleLeaveFields(); updateLeavePolicyInfo()">
+              <option value="Yıllık Ücretli İzin">Yıllık Ücretli İzin</option>
+              <option value="Sağlık Raporu">Sağlık Raporu</option>
+              <option value="İdari İzin">İdari İzin</option>
+              <option value="İş Seyahati">İş Seyahati</option>
+              <option value="Saatlik İzin">Saatlik İzin</option>
+              <option value="Fuar">Fuar</option>
+            </select>
+          </div>
+          <div>
+            <label>Açıklama</label>
+            <input id="leaveNote" placeholder="İsteğe bağlı açıklama">
+          </div>
+          <div id="startDateWrap">
+            <label>Başlangıç Tarihi</label>
+            <input id="startDate" type="date">
+          </div>
+          <div id="endDateWrap">
+            <label>Bitiş Tarihi</label>
+            <input id="endDate" type="date">
+          </div>
+          <div id="singleDateWrap" class="hidden">
+            <label>Tarih</label>
+            <input id="singleDate" type="date">
+          </div>
+          <div id="startTimeWrap" class="hidden">
+            <label>Başlangıç Saati</label>
+            <input id="startTime" type="time" value="09:00">
+          </div>
+          <div id="endTimeWrap" class="hidden">
+            <label>Bitiş Saati</label>
+            <input id="endTime" type="time" value="10:00">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button id="requestSubmitBtn" class="btn btn-primary" onclick="submitLeave()">Talebi Gönder</button>
+          <button class="btn btn-ghost" onclick="showPage('dashboard')">Vazgeç</button>
+        </div>
+      </div>
+    </section>
+
+    
+    <section id="page-calendar" class="hidden">
+      <div class="card">
+        <div class="calendar-head">
+          <div>
+            <h2 style="margin:0">İzin Takvimi</h2>
+            <div id="calendarScopeSubtitle" class="muted" style="margin-top:4px">İzinler ve Türkiye resmi tatilleri</div>
+          </div>
+          <div class="calendar-toolbar">
+            <button class="btn btn-ghost" onclick="changeCalendarMonth(-1)">←</button>
+            <select id="calendarMonthSelect" onchange="setCalendarFromSelectors()"></select>
+            <select id="calendarYearSelect" onchange="setCalendarFromSelectors()"></select>
+            <button class="btn btn-ghost" onclick="changeCalendarMonth(1)">→</button>
+            <button class="btn btn-ghost" onclick="goCalendarToday()">Bugün</button>
+          </div>
+        </div>
+
+        <div id="calendarScopeTabs" class="calendar-scope-tabs hidden">
+          <button id="scopeOwnBtn" class="calendar-scope-tab active" onclick="setCalendarScope('own')">Kendi Takvimim</button>
+          <button id="scopeTeamBtn" class="calendar-scope-tab" onclick="setCalendarScope('team')">Ekip Takvimi</button>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><span class="legend-dot"></span> İzin / Fuar kaydı</div>
+          <div class="legend-item"><span class="legend-dot holiday"></span> Resmi tatil</div>
+        </div>
+
+        <div id="calendarFocusPanel" class="calendar-focus hidden"></div>
+        <div id="calendar" class="calendar"></div>
+
+        <div class="holiday-list">
+          <h3 id="holidayListTitle" style="margin:0 0 8px;font-size:15px">Bu Ayın Resmi Tatilleri</h3>
+          <div id="holidayList"></div>
+          <div class="muted" style="font-size:11px;margin-top:10px">
+            Resmi tatil verileri Türkiye için tanımlanmıştır. Arefe günleri ve 28 Ekim yarım gün olarak işlenir.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+    <section id="page-approvals" class="hidden">
+      <div class="approval-tabs">
+        <button id="tabPending" class="approval-tab active" onclick="showApprovalSection('pending')">
+          Onay Bekleyenler <span id="pendingTabBadge" class="notification-badge hidden">0</span>
+        </button>
+        <button id="tabApproved" class="approval-tab" onclick="showApprovalSection('approved')">
+          Onaylanmış İzinler
+        </button>
+      </div>
+
+      <div id="approvalPendingSection">
+        <div id="approvalAlert"></div>
+        <div id="approvalPolicyInfo" class="card" style="margin-bottom:14px;font-size:13px;color:#53616d">
+          <b>Onay Akışı:</b> Yıllık Ücretli İzin, İdari İzin, İş Seyahati, Saatlik İzin ve Fuar kayıtları müdür onayına gelir.
+          Sağlık Raporu yalnızca kayıt/bildirim olarak tutulur ve onay beklemez.
+        </div>
+        <div id="approvalList"></div>
+      </div>
+
+      <div id="approvalApprovedSection" class="hidden">
+        <div class="section-heading-row">
+          <div>
+            <h2 style="margin:0">Onaylanmış İzinler</h2>
+            <div class="muted" style="margin-top:4px">Personel bazında onay geçmişi</div>
+          </div>
+        </div>
+        <div id="approvedPeopleList" class="approved-person-grid"></div>
+      </div>
+    </section>
+
+    <section id="page-team" class="hidden">
+      <div class="section" style="margin-top:0">
+        <div class="section-heading-row">
+          <div>
+            <h2 id="teamHeading" style="margin:0">Ekibim</h2>
+            <div id="teamSubtitle" class="muted" style="margin-top:4px">İzinler ve görev kayıtları için ekip özeti</div>
+          </div>
+        </div>
+
+        <div class="team-summary-grid">
+          <div class="team-summary-card">
+            <div class="team-summary-label">Toplam Ekip</div>
+            <div class="team-summary-value" id="teamSummaryPeople">0 Kişi</div>
+          </div>
+          <div class="team-summary-card">
+            <div class="team-summary-label">Bugün İzinli</div>
+            <div class="team-summary-value" id="teamSummaryLeaveToday">0 Kişi</div>
+          </div>
+          <div class="team-summary-card special-fair">
+            <div class="team-summary-label">Bugün Görevde</div>
+            <div class="team-summary-value" id="teamSummaryFairToday">0 Kişi</div>
+          </div>
+          <div class="team-summary-card">
+            <div class="team-summary-label">Bekleyen Onay</div>
+            <div class="team-summary-value" id="teamSummaryPending">0 Talep</div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="team-table">
+            <thead>
+              <tr>
+                <th>Personel</th>
+                <th>Departman</th>
+                <th>Yıllık Hak</th>
+                <th>Kullanılan</th>
+                <th>Kalan</th>
+                <th>Saatlik</th>
+                <th>Görev</th>
+                <th>Bekleyen</th>
+              </tr>
+            </thead>
+            <tbody id="teamBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="team-chart-head">
+          <div>
+            <h2 style="margin:0">Ekip İzin / Görev Özeti</h2>
+            <div class="muted" style="margin-top:4px">Personel ve kayıt türü seçerek kim, ne zaman ve hangi nedenle izin / görev kaydı oluşturmuş görebilirsiniz</div>
+          </div>
+          <div class="team-chart-controls">
+            <label for="teamTimelineYear">Yıl</label>
+            <select id="teamTimelineYear" onchange="renderTeamTimeline()"></select>
+
+            <label for="teamTimelinePerson">Personel</label>
+            <select id="teamTimelinePerson" onchange="renderTeamTimeline()">
+              <option value="all">Tüm Personel</option>
+            </select>
+
+            <label for="teamTimelineFilter">Kayıt Türü</label>
+            <select id="teamTimelineFilter" onchange="renderTeamTimeline()">
+              <option value="all">Tüm Kayıtlar</option>
+              <option value="Yıllık Ücretli İzin">Yıllık Ücretli İzin</option>
+              <option value="Sağlık Raporu">Sağlık Raporu</option>
+              <option value="İdari İzin">İdari İzin</option>
+              <option value="Saatlik İzin">Saatlik İzin</option>
+              <option value="Görev">Görev</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="teamSelectionSummary" class="selection-summary">
+          <div class="selection-summary-item">
+            <span>Personel</span>
+            <b id="selSummaryPerson">Tüm Personel</b>
+          </div>
+          <div class="selection-summary-item">
+            <span>Kayıt Türü</span>
+            <b id="selSummaryType">Tüm Kayıtlar</b>
+          </div>
+          <div class="selection-summary-item">
+            <span>Kayıt Sayısı</span>
+            <b id="selSummaryCount">0</b>
+          </div>
+          <div class="selection-summary-item">
+            <span>Toplam Süre</span>
+            <b id="selSummaryDuration">0</b>
+          </div>
+          <div class="selection-summary-item selection-summary-wide">
+            <span>Son Kayıt / Açıklama</span>
+            <b id="selSummaryLast">—</b>
+          </div>
+        </div>
+
+        <div class="timeline-month-head">
+          <div class="timeline-person-head">Personel / Neden</div>
+          <div class="timeline-months">
+            <span>Oca</span><span>Şub</span><span>Mar</span><span>Nis</span><span>May</span><span>Haz</span>
+            <span>Tem</span><span>Ağu</span><span>Eyl</span><span>Eki</span><span>Kas</span><span>Ara</span>
+          </div>
+        </div>
+        <div id="teamTimeline" class="team-timeline"></div>
+        <div class="timeline-legend">
+          <span><i class="tl-dot tl-leave"></i> İ = İzin</span>
+          <span><i class="tl-dot tl-fair"></i> G = Görev</span>
+        </div>
+        <div class="timeline-click-note">İ veya G işaretine tıklayarak kayıt detayını görüntüleyebilirsiniz.</div>
+      </div>
+    </section>
+
+    <section id="page-users" class="hidden">
+      <div class="card">
+        <h2 style="margin-top:0">Kullanıcı Yönetimi</h2>
+        <div class="permission-note">
+          Müdür yalnızca <b>personel hesabı ekleyebilir veya silebilir.</b>
+          Rol, yıllık izin hakkı, izin türleri ve sistem kuralları bu ekrandan değiştirilemez.
+          Yeni personelin yıllık hakkı varsayılan olarak 14 iş günüdür.
+        </div>
+        <div class="user-grid">
+          <div>
+            <label>Ad Soyad</label>
+            <input id="newFullName" placeholder="Ad Soyad">
+          </div>
+          <div>
+            <label>Kullanıcı Adı</label>
+            <input id="newUsername" placeholder="kullaniciadi">
+          </div>
+          <div>
+            <label>Departman</label>
+            <input id="newDepartment" value="Yurtdışı Satış">
+          </div>
+          <div>
+            <label>Geçici Şifre</label>
+            <input id="newPassword" value="Mars123.">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addUser()">+ Kullanıcı Ekle</button>
+        </div>
+      </div>
+      <div class="section">
+        <h2>Aktif Kullanıcılar</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Personel</th><th>Kullanıcı Adı</th><th>Rol</th><th>Departman</th><th>Yıllık Hak</th><th>İşlem</th></tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+
+<div id="approvalToast" class="toast-notification">
+  <div id="approvalToastTitle" class="toast-title">🔔 Bildirim</div>
+  <div id="approvalToastText" class="toast-text"></div>
+</div>
+
+<div id="detailModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">İzin Detayı</h3>
+      <button class="btn btn-ghost" onclick="closeModal()">Kapat</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+
+<script>
+let sessionToken=null, currentUser=null, requests=[], users=[];
+let pollTimer=null, lastPendingCount=0;
+let personalUnreadNotifications=[];
+let requestStatusSnapshot={};
+let notificationStateReady=false;
+let baseDocumentTitle=document.title;
+let currentApprovalSection="pending";
+let calendarScope="own", calendarFocusUser=null, calendarFocusType=null;
+let calendarYear=new Date().getFullYear(), calendarMonth=new Date().getMonth();
+
+const MONTH_NAMES=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+const RELIGIOUS_HOLIDAY_BASES={
+  2022:{ramadanEves:["2022-05-01"],sacrificeEve:"2022-07-08"},
+  2023:{ramadanEves:["2023-04-20"],sacrificeEve:"2023-06-27"},
+  2024:{ramadanEves:["2024-04-09"],sacrificeEve:"2024-06-15"},
+  2025:{ramadanEves:["2025-03-29"],sacrificeEve:"2025-06-05"},
+  2026:{ramadanEves:["2026-03-19"],sacrificeEve:"2026-05-26"},
+  2027:{ramadanEves:["2027-03-08"],sacrificeEve:"2027-05-15"},
+  2028:{ramadanEves:["2028-02-25"],sacrificeEve:"2028-05-04"},
+  2029:{ramadanEves:["2029-02-13"],sacrificeEve:"2029-04-23"},
+  2030:{ramadanEves:["2030-02-03"],sacrificeEve:"2030-04-12"},
+  2031:{ramadanEves:["2031-01-23"],sacrificeEve:"2031-04-01"},
+  2032:{ramadanEves:["2032-01-13"],sacrificeEve:"2032-03-21"},
+  2033:{ramadanEves:["2033-01-01","2033-12-22"],sacrificeEve:"2033-03-10"},
+  2034:{ramadanEves:["2034-12-11"],sacrificeEve:"2034-02-28"},
+  2035:{ramadanEves:["2035-11-30"],sacrificeEve:"2035-02-17"}
+};
+
+function el(id){return document.getElementById(id)}
+function isManager(){return currentUser?.role==="manager"}
+function isGeneralManager(){return currentUser?.role==="general_manager"}
+function isLeader(){return isManager()||isGeneralManager()}
+function roleLabel(role){
+  if(role==="general_manager")return "Genel Müdür";
+  if(role==="manager")return "Yurt Dışı Satış Müdürü";
+  return "Personel";
+}
+function ownDirectRecordStatus(r){
+  return r.status==="Onaylandı" || (isGeneralManager() && r.user===currentUser.username && r.status==="Bildirildi");
+}
+function showSync(text,isError=false){
+  const x=el("syncStatus"); if(!x)return;
+  x.textContent=text; x.classList.toggle("error",isError);
+}
+async function rpc(name,args){
+  if(!window.MARS_CONFIG || !MARS_CONFIG.url || !MARS_CONFIG.anonKey){
+    throw new Error("Supabase bağlantı ayarları bulunamadı.");
+  }
+
+  const base=MARS_CONFIG.url.replace(/\/+$/,"");
+  const response=await fetch(`${base}/rest/v1/rpc/${name}`,{
+    method:"POST",
+    headers:{
+      "apikey":MARS_CONFIG.anonKey,
+      "Authorization":`Bearer ${MARS_CONFIG.anonKey}`,
+      "Content-Type":"application/json",
+      "Accept":"application/json"
+    },
+    body:JSON.stringify(args||{})
+  });
+
+  let payload=null;
+  const txt=await response.text();
+  if(txt){
+    try{payload=JSON.parse(txt)}catch(e){payload=txt}
+  }
+
+  if(!response.ok){
+    const msg=(payload&&payload.message) || (payload&&payload.error) || (typeof payload==="string" ? payload : `HTTP ${response.status}`);
+    throw new Error(msg);
+  }
+  return payload;
+}
+
+async function testConnection(){
+  try{
+    const base=MARS_CONFIG.url.replace(/\/+$/,"");
+    const r=await fetch(`${base}/rest/v1/`,{
+      headers:{
+        "apikey":MARS_CONFIG.anonKey,
+        "Authorization":`Bearer ${MARS_CONFIG.anonKey}`
+      }
+    });
+    return r.ok || r.status===404 || r.status===401;
+  }catch(e){
+    return false;
+  }
+}
+
+
+function notificationStorageKey(kind){
+  return `mars_${kind}_${currentUser?.username||"guest"}`;
+}
+function loadNotificationState(){
+  try{
+    personalUnreadNotifications=JSON.parse(localStorage.getItem(notificationStorageKey("unread_notifications"))||"[]");
+    requestStatusSnapshot=JSON.parse(localStorage.getItem(notificationStorageKey("request_snapshot"))||"{}");
+  }catch(e){
+    personalUnreadNotifications=[];
+    requestStatusSnapshot={};
+  }
+  notificationStateReady=true;
+}
+function saveNotificationState(){
+  if(!currentUser)return;
+  try{
+    localStorage.setItem(notificationStorageKey("unread_notifications"),JSON.stringify(personalUnreadNotifications));
+    localStorage.setItem(notificationStorageKey("request_snapshot"),JSON.stringify(requestStatusSnapshot));
+  }catch(e){}
+}
+function requestDecisionSignature(r){
+  return [
+    r.status||"",
+    r.decisionAt||"",
+    r.approvalRevokedAt||"",
+    r.withdrawnAt||""
+  ].join("|");
+}
+function decisionNotificationInfo(r){
+  if(r.status==="Onaylandı"){
+    return {icon:"✓",cls:"approved",title:"Talebiniz onaylandı",body:`${r.type} • ${dateText(r)}`};
+  }
+  if(r.status==="Reddedildi"){
+    return {icon:"×",cls:"rejected",title:"Talebiniz reddedildi",body:`${r.type} • ${dateText(r)}`};
+  }
+  if(r.status==="Onay Geri Çekildi"){
+    return {icon:"↩",cls:"revoked",title:"Onay geri çekildi",body:`${r.type} • ${dateText(r)}`};
+  }
+  return null;
+}
+function showInAppToast(title,htmlText){
+  const titleEl=el("approvalToastTitle");
+  const textEl=el("approvalToastText");
+  const toast=el("approvalToast");
+  if(!toast||!textEl)return;
+  if(titleEl)titleEl.textContent=title;
+  textEl.innerHTML=htmlText;
+  toast.classList.add("show");
+  clearTimeout(showInAppToast._timer);
+  showInAppToast._timer=setTimeout(()=>toast.classList.remove("show"),6500);
+}
+
+const MARS_VAPID_PUBLIC_KEY="BGNoTXlM2A1XMSFBtUquHraSHs98KnZ-LXOOjaYtEMPP4bNiwKf0C9tiTGVGR5C-cgdG2INWHML03XQX7lJ-BNc";
+
+function marsUrlBase64ToUint8Array(base64String){
+  const padding="=".repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,"+").replace(/_/g,"/");
+  const rawData=atob(base64);
+  return Uint8Array.from([...rawData].map(ch=>ch.charCodeAt(0)));
+}
+
+async function registerMarsPushSubscription(){
+  if(!sessionToken || !currentUser) return false;
+  if(!window.isSecureContext || !("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+  if(!("Notification" in window) || Notification.permission!=="granted") return false;
+
+  try{
+    const registration=await navigator.serviceWorker.ready;
+    let subscription=await registration.pushManager.getSubscription();
+
+    if(!subscription){
+      subscription=await registration.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:marsUrlBase64ToUint8Array(MARS_VAPID_PUBLIC_KEY)
+      });
+    }
+
+    const json=subscription.toJSON();
+    if(!json.endpoint || !json.keys?.p256dh || !json.keys?.auth){
+      throw new Error("Push abonelik anahtarları alınamadı.");
+    }
+
+    await rpc("mars_save_push_subscription",{
+      p_token:sessionToken,
+      p_endpoint:json.endpoint,
+      p_p256dh:json.keys.p256dh,
+      p_auth:json.keys.auth,
+      p_user_agent:navigator.userAgent
+    });
+
+    try{
+      localStorage.setItem("mars_push_endpoint_"+currentUser.username,json.endpoint);
+    }catch(e){}
+
+    const txt=el("notificationTestText");
+    if(txt) txt.textContent="Push bildirim cihazı kayıtlı.";
+    return true;
+  }catch(e){
+    console.error("Push subscription error",e);
+    const txt=el("notificationTestText");
+    if(txt) txt.textContent="Push cihaz kaydı tamamlanamadı.";
+    return false;
+  }
+}
+
+async function ensureDesktopNotificationPermission(){
+  if(!("Notification" in window))return;
+  if(Notification.permission==="default"){
+    try{await Notification.requestPermission()}catch(e){}
+  }
+  if(Notification.permission==="granted"){
+    await registerMarsPushSubscription();
+  }
+  renderNotificationPermissionArea();
+}
+async function requestDesktopNotificationPermission(event){
+  if(event){event.preventDefault();event.stopPropagation()}
+  if(!window.isSecureContext){
+    showInAppToast("Bildirim açılamadı","Bu uygulama güvenli yerel bağlantıdan açılmalı. V21.4 masaüstü kısayolunu kullanın.");
+    renderNotificationPermissionArea();
+    return;
+  }
+  if(!("Notification" in window)){
+    showInAppToast("Bildirim desteklenmiyor","Bu tarayıcı Windows bildirimlerini desteklemiyor.");
+    return;
+  }
+  try{
+    const result=await Notification.requestPermission();
+    renderNotificationPermissionArea();
+    if(result==="granted"){
+      const pushOk=await registerMarsPushSubscription();
+      showDesktopNotification("MARS ELEVATOR","Windows bildirimleri başarıyla etkinleştirildi.");
+      showInAppToast("🔔 Bildirimler Açık",pushOk?"Cihazınız gerçek push bildirimleri için kaydedildi.":"Windows bildirimi açıldı; push cihaz kaydı tekrar denenecek.");
+    }else if(result==="denied"){
+      showInAppToast("Bildirim Engellendi","Chrome bu site için bildirim iznini engelledi. Tarayıcı site izinlerinden bildirimleri açmanız gerekir.");
+    }
+  }catch(e){
+    showInAppToast("Bildirim Hatası",String(e.message||e));
+  }
+}
+function sendTestDesktopNotification(event){
+  if(event){event.preventDefault();event.stopPropagation()}
+  showDesktopNotification("MARS ELEVATOR • Test","Bildirim sistemi çalışıyor.");
+}
+function showDesktopNotification(title,body){
+  if(!("Notification" in window) || Notification.permission!=="granted")return;
+  try{
+    const n=new Notification(title,{
+      body,
+      icon:"assets/mars_logo.png",
+      badge:"assets/mars_badge.png",
+      tag:"mars-elevator-"+title+"-"+Date.now()
+    });
+    n.onclick=()=>{try{window.focus()}catch(e){};n.close()};
+    setTimeout(()=>{try{n.close()}catch(e){}},9000);
+  }catch(e){}
+}
+function renderNotificationPermissionArea(){
+  const a=el("notificationPermissionArea");
+  const t=el("notificationTestArea");
+  const txt=el("notificationPermissionText");
+  const btn=el("notificationPermissionBtn");
+  if(!a)return;
+
+  if(!window.isSecureContext){
+    a.classList.remove("hidden");
+    if(t)t.classList.add("hidden");
+    if(txt)txt.textContent="Bildirim için V21.4 masaüstü kısayolunu kullanın.";
+    if(btn){btn.textContent="Kontrol Et";btn.disabled=false}
+    return;
+  }
+  if(!("Notification" in window)){
+    a.classList.remove("hidden");
+    if(t)t.classList.add("hidden");
+    if(txt)txt.textContent="Tarayıcı Windows bildirimlerini desteklemiyor.";
+    if(btn)btn.classList.add("hidden");
+    return;
+  }
+
+  if(btn)btn.classList.remove("hidden");
+  if(Notification.permission==="granted"){
+    a.classList.add("hidden");
+    if(t)t.classList.remove("hidden");
+    const testText=el("notificationTestText");
+    if(testText)testText.textContent="Push bildirim cihazı kayıtlı / kontrol ediliyor.";
+  }else{
+    a.classList.remove("hidden");
+    if(t)t.classList.add("hidden");
+    if(Notification.permission==="denied"){
+      if(txt)txt.textContent="Chrome bildirim izni engellenmiş.";
+      if(btn)btn.textContent="Tekrar Dene";
+    }else{
+      if(txt)txt.textContent="Windows bildirimleri kapalı.";
+      if(btn)btn.textContent="Etkinleştir";
+    }
+  }
+}
+function processPersonalDecisionNotifications(){
+  if(!currentUser||!notificationStateReady)return;
+  const mine=requests.filter(r=>r.user===currentUser.username);
+  const firstSnapshot=Object.keys(requestStatusSnapshot).length===0;
+
+  mine.forEach(r=>{
+    const key=String(r.id);
+    const sig=requestDecisionSignature(r);
+    const old=requestStatusSnapshot[key];
+
+    if(!firstSnapshot && old && old!==sig){
+      const info=decisionNotificationInfo(r);
+      if(info){
+        const notifKey=`${key}|${sig}`;
+        const exists=personalUnreadNotifications.some(n=>n.key===notifKey);
+        if(!exists){
+          const item={
+            key:notifKey,
+            requestId:key,
+            status:r.status,
+            type:r.type,
+            date:dateText(r),
+            note:r.note||"",
+            title:info.title,
+            body:info.body,
+            cls:info.cls,
+            icon:info.icon,
+            time:r.decisionAt||r.approvalRevokedAt||new Date().toISOString()
+          };
+          personalUnreadNotifications.unshift(item);
+          personalUnreadNotifications=personalUnreadNotifications.slice(0,30);
+          showInAppToast("🔔 "+info.title,`${info.body}${r.note?" • "+r.note:""}`);
+          showDesktopNotification(info.title,`${info.body}${r.note?" — "+r.note:""}`);
+        }
+      }
+    }
+    requestStatusSnapshot[key]=sig;
+  });
+
+  // Remove snapshots of very old requests no longer returned.
+  const activeIds=new Set(mine.map(r=>String(r.id)));
+  Object.keys(requestStatusSnapshot).forEach(k=>{
+    if(!activeIds.has(k))delete requestStatusSnapshot[k];
+  });
+
+  saveNotificationState();
+}
+function pendingActionCount(){
+  return isLeader()?pendingManagerRequests().length:0;
+}
+function totalNotificationCount(){
+  return pendingActionCount()+personalUnreadNotifications.length;
+}
+function updateBadgedFavicon(count){
+  const link=el("appFavicon");
+  if(!link)return;
+  if(!count){
+    link.href="assets/mars_elevator.ico";
+    return;
+  }
+  const shown=count>99?"99+":String(count);
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+    <rect width="64" height="64" rx="12" fill="#ffffff"/>
+    <rect x="4" y="4" width="56" height="56" rx="10" fill="#214d7d"/>
+    <text x="12" y="40" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#ffffff">M</text>
+    <circle cx="48" cy="16" r="14" fill="#df382f" stroke="#ffffff" stroke-width="3"/>
+    <text x="48" y="20" text-anchor="middle" font-family="Arial,sans-serif" font-size="${shown.length>2?10:13}" font-weight="700" fill="#ffffff">${shown}</text>
+  </svg>`;
+  link.href="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+}
+function updateAppBadge(){
+  const count=totalNotificationCount();
+  const badge=el("globalNotificationBadge");
+  if(badge){
+    badge.textContent=count>99?"99+":String(count);
+    badge.classList.toggle("hidden",count===0);
+  }
+
+  document.title=count>0?`(${count}) ${baseDocumentTitle}`:baseDocumentTitle;
+  updateBadgedFavicon(count);
+
+  // Works on installed PWAs / supported Chromium environments; safely ignored otherwise.
+  try{
+    if(count>0 && navigator.setAppBadge){
+      navigator.setAppBadge(count).catch(()=>{});
+    }else if(count===0 && navigator.clearAppBadge){
+      navigator.clearAppBadge().catch(()=>{});
+    }
+  }catch(e){}
+
+  renderNotificationPanel();
+}
+function notificationTimeText(value){
+  if(!value)return"";
+  const d=new Date(value);
+  return isNaN(d)?"":d.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+}
+function renderNotificationPanel(){
+  const body=el("notificationPanelBody");
+  const sub=el("notificationPanelSubtitle");
+  const mark=el("markAllNotificationsBtn");
+  if(!body)return;
+
+  const pending=pendingActionCount();
+  const unread=personalUnreadNotifications.length;
+  const parts=[];
+
+  if(pending>0){
+    const who=isGeneralManager()?"Kahtan Yunus":"Ekibiniz";
+    parts.push(`<div class="notification-item" onclick="openPendingNotifications(event)">
+      <div class="notification-item-icon pending">!</div>
+      <div class="notification-item-main">
+        <div class="notification-item-title">${pending} onay bekleyen talep</div>
+        <div class="notification-item-text">${who} tarafından gönderilen izin talepleri işlem bekliyor.</div>
+      </div>
+      <div class="notification-unread-dot"></div>
+    </div>`);
+  }
+
+  personalUnreadNotifications.forEach(n=>{
+    parts.push(`<div class="notification-item" onclick="openPersonalNotification('${n.key.replace(/'/g,"\\'")}',event)">
+      <div class="notification-item-icon ${n.cls||"approved"}">${n.icon||"✓"}</div>
+      <div class="notification-item-main">
+        <div class="notification-item-title">${n.title}</div>
+        <div class="notification-item-text">${n.body}${n.note?" • "+n.note:""}</div>
+        <div class="notification-item-time">${notificationTimeText(n.time)}</div>
+      </div>
+      <div class="notification-unread-dot"></div>
+    </div>`);
+  });
+
+  body.innerHTML=parts.length?parts.join(""):'<div class="notification-empty">Yeni bildirim bulunmuyor.</div>';
+  if(sub)sub.textContent=(pending+unread)>0?`${pending+unread} bildirim / işlem bulunuyor`:"Yeni bildirim bulunmuyor";
+  if(mark)mark.classList.toggle("hidden",unread===0);
+  renderNotificationPermissionArea();
+}
+function toggleNotificationPanel(event){
+  if(event)event.stopPropagation();
+  const p=el("notificationPanel");if(!p)return;
+  p.classList.toggle("hidden");
+  renderNotificationPanel();
+}
+function closeNotificationPanel(){
+  const p=el("notificationPanel");if(p)p.classList.add("hidden");
+}
+function openPendingNotifications(event){
+  if(event)event.stopPropagation();
+  closeNotificationPanel();
+  showPage("approvals");
+}
+function openPersonalNotification(key,event){
+  if(event)event.stopPropagation();
+  personalUnreadNotifications=personalUnreadNotifications.filter(n=>n.key!==key);
+  saveNotificationState();
+  updateAppBadge();
+  closeNotificationPanel();
+  showPage("dashboard");
+}
+function markAllPersonalNotificationsRead(event){
+  if(event){event.preventDefault();event.stopPropagation()}
+  personalUnreadNotifications=[];
+  saveNotificationState();
+  updateAppBadge();
+}
+document.addEventListener("click",e=>{
+  const center=document.querySelector(".notification-center");
+  if(center && !center.contains(e.target))closeNotificationPanel();
+});
+
+function init(){
+  if(!window.MARS_CONFIG || !MARS_CONFIG.url || !MARS_CONFIG.anonKey || MARS_CONFIG.url.includes("BURAYA")){
+    alert("Supabase ayarları bulunamadı. 2_SUPABASE_AYARLA.bat dosyasını yeniden çalıştırın.");
+    return;
+  }
+
+  // Kullanıcı adı veya şifre alanındayken Enter'a basılırsa giriş yap.
+  ["loginUser","loginPass"].forEach(id=>{
+    const input=el(id);
+    if(input){
+      input.addEventListener("keydown",e=>{
+        if(e.key==="Enter"){
+          e.preventDefault();
+          login();
+        }
+      });
+    }
+  });
+
+  updateLeavePolicyInfo();
+  renderNotificationPermissionArea();
+
+  if("serviceWorker" in navigator && window.isSecureContext){
+    navigator.serviceWorker.register("./sw.js",{scope:"./",updateViaCache:"none"})
+      .then(()=>navigator.serviceWorker.ready)
+      .catch(()=>{});
+  }
+}
+async function login(){
+  try{
+    const username=el("loginUser").value.trim();
+    const password=el("loginPass").value;
+    const d=await rpc("mars_login",{p_username:username,p_password:password});
+    if(!d || !d.ok){alert((d&&d.message)||"Kullanıcı adı veya şifre hatalı.");return}
+    sessionToken=d.token; currentUser=d.user;
+    loadNotificationState();
+    calendarScope="own"; calendarFocusUser=null; calendarFocusType=null;
+    el("loginScreen").classList.add("hidden");
+    el("app").classList.remove("hidden");
+    el("sideName").textContent=currentUser.name;
+    el("sideRole").textContent=isGeneralManager()?"Genel Müdür":(isManager()?(currentUser.department||"Yurt Dışı Satış Müdürü"):currentUser.department);
+    el("welcome").textContent="Hoş geldiniz, "+currentUser.name;
+
+    el("approvalNav").classList.toggle("hidden",!isLeader());
+    el("teamNav").classList.toggle("hidden",!isLeader());
+    el("usersNav").classList.toggle("hidden",!isManager());
+    el("calendarScopeTabs").classList.toggle("hidden",!isLeader());
+
+    if(isGeneralManager()){
+      el("requestNav").textContent="＋ İzin Kaydı";
+      el("newRequestTopBtn").textContent="+ Yeni İzin Kaydı";
+      el("requestHeading").textContent="Yeni İzin Kaydı";
+      el("requestSubmitBtn").textContent="İzin Kaydet";
+      el("myRequestsTitle").textContent="Son İzin Kayıtlarım";
+      el("approvalNavText").textContent="Kahtan Onayları";
+      el("teamNavText").textContent="Personel İzinleri";
+      el("teamHeading").textContent="Personel İzinleri";
+      el("teamSubtitle").textContent="Personellerin izin ve görev kayıtlarını görüntüleyebilirsiniz.";
+      el("tabApproved").classList.add("hidden");
+      el("approvalPolicyInfo").innerHTML="<b>Genel Müdür Onayı:</b> Bu ekranda yalnızca Kahtan Yunus tarafından gönderilen onay bekleyen talepler görünür. Personel talepleri Kahtan Yunus tarafından onaylanmaya devam eder.";
+    }else{
+      el("requestNav").textContent="＋ İzin Talebi";
+      el("newRequestTopBtn").textContent="+ Yeni İzin Talebi";
+      el("requestHeading").textContent="Yeni İzin Talebi";
+      el("requestSubmitBtn").textContent="Talebi Gönder";
+      el("myRequestsTitle").textContent="Son İzin Taleplerim";
+      el("approvalNavText").textContent="Müdür Onayları";
+      el("teamNavText").textContent="Ekibim";
+      el("teamHeading").textContent="Ekibim";
+      el("teamSubtitle").textContent="İzinler ve görev kayıtları için ekip özeti";
+      el("tabApproved").classList.remove("hidden");
+      el("approvalPolicyInfo").innerHTML="<b>Onay Akışı:</b> Yıllık Ücretli İzin, İdari İzin, İş Seyahati, Saatlik İzin ve Fuar kayıtları müdür onayına gelir. Sağlık Raporu yalnızca kayıt/bildirim olarak tutulur ve onay beklemez.";
+    }
+
+    updateLeavePolicyInfo();
+    await refreshAll(true);
+    // Login kullanıcı etkileşimiyle tetiklendiği için izin istemeyi burada dener.
+    ensureDesktopNotificationPermission();
+    showPage("dashboard");
+    clearInterval(pollTimer);
+    pollTimer=setInterval(()=>refreshAll(false),7000);
+  }catch(e){
+    alert("Giriş hatası: "+e.message+"\n\nBağlantı ayarları doğruysa Supabase Data API erişimini kontrol edeceğiz.");
+  }
+}
+async function logout(){
+  clearInterval(pollTimer);
+  try{if(navigator.clearAppBadge)navigator.clearAppBadge().catch(()=>{})}catch(e){}
+  try{if(sessionToken)await rpc("mars_logout",{p_token:sessionToken})}catch(e){}
+  location.reload();
+}
+async function refreshAll(showMessage=false){
+  try{
+    if(showMessage)showSync("Senkronize ediliyor...");
+    requests=await rpc("mars_list_requests",{p_token:sessionToken}) || [];
+    if(isLeader()){
+      users=await rpc("mars_list_users",{p_token:sessionToken}) || [];
+    }else{
+      users=[{username:currentUser.username,name:currentUser.name,role:currentUser.role,department:currentUser.department,annualEntitlement:Number(currentUser.annualEntitlement)}];
+    }
+    renderDashboard();
+    renderApprovals();
+    renderTeam();
+    renderUsers();
+    renderCalendar();
+    processPersonalDecisionNotifications();
+    updateApprovalNotifications(true);
+    updateAppBadge();
+    showSync("Merkezi veri • güncel • Push hazır");
+  }catch(e){
+    console.error(e);
+    showSync("Bağlantı hatası: "+e.message,true);
+  }
+}
+function showPage(page){
+  ["dashboard","request","calendar","approvals","team","users"].forEach(p=>{
+    const sec=el("page-"+p); if(sec)sec.classList.toggle("hidden",p!==page);
+    const nav=document.querySelector(`[data-page="${p}"]`); if(nav)nav.classList.toggle("active",p===page);
+  });
+  const titles={
+    dashboard:"Ana Sayfa",
+    request:isGeneralManager()?"İzin Kaydı":"İzin Talebi",
+    calendar:"İzin Takvimi",
+    approvals:isGeneralManager()?"Kahtan Onayları":"Müdür Onayları",
+    team:isGeneralManager()?"Personel İzinleri":"Ekibim",
+    users:"Kullanıcı Yönetimi"
+  };
+  el("pageTitle").textContent=titles[page]||"";
+  if(page==="dashboard")renderDashboard();
+  if(page==="calendar")renderCalendar();
+  if(page==="approvals")showApprovalSection(isGeneralManager()?"pending":currentApprovalSection);
+  if(page==="team")renderTeam();
+  if(page==="users")renderUsers();
+}
+function myReqs(){return requests.filter(r=>r.user===currentUser.username)}
+function isRecorded(r){
+  return r.status==="Onaylandı" || r.status==="Bildirildi";
+}
+function activeAnnual(r){
+  return r.type==="Yıllık Ücretli İzin" && ownDirectRecordStatus(r);
+}
+function formatWorkDays(n){
+  n=Number(n||0); return (Number.isInteger(n)?String(n):n.toFixed(1).replace(".",","))+" İş Günü";
+}
+function formatHours(h){
+  const total=Math.round(Number(h||0)*60),hh=Math.floor(total/60),mm=total%60;
+  return mm?`${hh} Saat ${mm} Dk`:`${hh} Saat`;
+}
+function trDate(s){if(!s)return"";const [y,m,d]=s.split("-");return `${d}.${m}.${y}`}
+function dateText(r){
+  if(r.type==="Saatlik İzin")return `${trDate(r.date)} • ${(r.startTime||"").slice(0,5)}-${(r.endTime||"").slice(0,5)}`;
+  return r.start===r.end?trDate(r.start):`${trDate(r.start)} - ${trDate(r.end)}`;
+}
+function durationText(r){return r.type==="Saatlik İzin"?formatHours(r.durationHours):formatWorkDays(r.durationDays)}
+function statusBadge(s){
+  let cls=(s==="Onaylandı"||s==="Bildirildi")?"ok":(s==="Bekliyor"||s==="Onay Geri Çekildi")?"wait":"bad";
+  return `<span class="badge ${cls}">${s}</span>`;
+}
+function canWithdraw(r){
+  return r.user===currentUser.username && ["Bekliyor","Onay Geri Çekildi","Bildirildi"].includes(r.status);
+}
+function renderDashboard(){
+  if(!currentUser)return;
+  const mine=myReqs();
+  const usedDays=mine.filter(activeAnnual).reduce((a,b)=>a+Number(b.durationDays||0),0);
+  const usedHours=mine.filter(r=>r.type==="Saatlik İzin"&&ownDirectRecordStatus(r)).reduce((a,b)=>a+Number(b.durationHours||0),0);
+  const healthDays=mine.filter(r=>r.type==="Sağlık Raporu"&&["Bildirildi","Onaylandı"].includes(r.status)).reduce((a,b)=>a+Number(b.durationDays||0),0);
+  const adminDays=mine.filter(r=>r.type==="İdari İzin"&&ownDirectRecordStatus(r)).reduce((a,b)=>a+Number(b.durationDays||0),0);
+  const travelDays=mine.filter(r=>r.type==="İş Seyahati"&&ownDirectRecordStatus(r)).reduce((a,b)=>a+Number(b.durationDays||0),0);
+  const ent=Number(currentUser.annualEntitlement||0);
+  el("annualEnt").textContent=formatWorkDays(ent);
+  el("annualUsed").textContent=formatWorkDays(usedDays);
+  el("annualRemaining").textContent=formatWorkDays(ent-usedDays);
+  el("hourlyUsed").textContent=formatHours(usedHours);
+  el("healthUsed").textContent=formatWorkDays(healthDays);
+  el("adminUsed").textContent=formatWorkDays(adminDays);
+  el("travelUsed").textContent=formatWorkDays(travelDays);
+  el("hourlyInfoUsed").textContent=formatHours(usedHours);
+
+  const body=el("myRequestsBody");
+  const list=mine.slice().sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  body.innerHTML=list.map(r=>{
+    let action="—";
+    if(canWithdraw(r)) action=`<button class="request-action" onclick="withdrawRequest('${r.id}')">Talebi Geri Çek</button>`;
+    else if(r.status==="Onaylandı"&&!isGeneralManager()) action='<span class="muted" style="font-size:12px">Önce yöneticinizin onayı geri çekmesi gerekir</span>';
+    return `<tr><td>${r.type}</td><td>${dateText(r)}</td><td>${durationText(r)}</td><td>${statusBadge(r.status)}</td><td>${action}</td></tr>`;
+  }).join("") || '<tr><td colspan="5" class="muted">Henüz izin kaydı bulunmuyor.</td></tr>';
+}
+async function withdrawRequest(id){
+  if(!confirm("Bu talebi geri çekmek istediğinize emin misiniz?"))return;
+  try{await rpc("mars_withdraw_request",{p_token:sessionToken,p_request_id:id});await refreshAll()}catch(e){alert(e.message)}
+}
+function toggleLeaveFields(){
+  const hourly=el("leaveType").value==="Saatlik İzin";
+  ["startDateWrap","endDateWrap"].forEach(id=>el(id).classList.toggle("hidden",hourly));
+  ["singleDateWrap","startTimeWrap","endTimeWrap"].forEach(id=>el(id).classList.toggle("hidden",!hourly));
+}
+function updateLeavePolicyInfo(){
+  const box=el("leavePolicyInfo"); if(!box)return;
+  const t=el("leaveType").value;
+
+  if(isGeneralManager()){
+    if(t==="Yıllık Ücretli İzin")box.innerHTML="<b>Kendi izin kaydınız doğrudan sisteme işlenir.</b> Yıllık izin bakiyenizden düşer. Cumartesi, Pazar ve tam gün resmi tatiller düşülmez.";
+    else if(t==="Sağlık Raporu")box.innerHTML="<b>Kayıt olarak sisteme işlenir.</b> Yıllık izin bakiyesinden düşmez.";
+    else if(t==="Saatlik İzin")box.innerHTML="<b>Kayıt olarak sisteme işlenir.</b> Saat bazında takip edilir ve yıllık izin bakiyesinden düşmez.";
+    else if(t==="Fuar")box.innerHTML="<b>Fuar izin değildir.</b> Görev kaydı olarak sisteme doğrudan işlenir.";
+    else if(t==="İş Seyahati")box.innerHTML="<b>İş Seyahati izin değildir.</b> Görev kaydı olarak sisteme doğrudan işlenir.";
+    else box.innerHTML="<b>Kendi izin kaydınız doğrudan sisteme işlenir.</b> Yıllık izin bakiyesinden düşmez.";
+    return;
+  }
+
+  const approvalText=isManager()?"Genel Müdür onayı gereklidir.":"Müdür onayı gereklidir.";
+  if(t==="Yıllık Ücretli İzin")box.innerHTML=`<b>Yıllık izin bakiyesinden düşer.</b> ${approvalText} Cumartesi, Pazar ve tam gün resmi tatiller düşülmez.`;
+  else if(t==="Sağlık Raporu")box.innerHTML="<b>Yıllık izin bakiyesinden düşmez.</b> Sadece kayıt/bildirim olarak sisteme işlenir.";
+  else if(t==="Saatlik İzin")box.innerHTML=`<b>Yıllık izinden gün olarak düşmez.</b> Saat bazında takip edilir ve ${approvalText.toLowerCase()}`;
+  else if(t==="Fuar")box.innerHTML=`<b>Fuar bir izin türü değildir.</b> Görev kaydı olarak tutulur ve ${approvalText.toLowerCase()}`;
+  else if(t==="İş Seyahati")box.innerHTML=`<b>İş Seyahati bir izin türü değildir.</b> Görev kaydı olarak tutulur ve ${approvalText.toLowerCase()}`;
+  else box.innerHTML=`<b>Yıllık izin bakiyesinden düşmez.</b> ${approvalText}`;
+}
+async function submitLeave(){
+  try{
+    const type=el("leaveType").value;
+    const args={p_token:sessionToken,p_type:type,p_start:null,p_end:null,p_date:null,p_start_time:null,p_end_time:null,p_note:el("leaveNote").value};
+    if(type==="Saatlik İzin"){
+      args.p_date=el("singleDate").value; args.p_start_time=el("startTime").value; args.p_end_time=el("endTime").value;
+    }else{
+      args.p_start=el("startDate").value; args.p_end=el("endDate").value;
+    }
+    const d=await rpc("mars_create_request",args);
+    if(d.status==="Bekliyor"){
+      alert(isManager()?"Talep Genel Müdür onayına gönderildi.":"Talep müdür onayına gönderildi.");
+    }else{
+      alert(isGeneralManager()?"İzin kaydı sisteme işlendi.":"Kayıt sisteme işlendi.");
+    }
+    ["leaveNote","startDate","endDate","singleDate"].forEach(id=>el(id).value="");
+    await refreshAll();showPage("dashboard");
+  }catch(e){alert("Talep oluşturulamadı: "+e.message)}
+}
+
+/* ---------------- Calendar ---------------- */
+function addIsoDays(iso,days){const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+days);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function holidayEntry(date,name,fraction=1){return {date,name,fraction}}
+function publicHolidaysForYear(year){
+  const y=String(year),list=[
+    holidayEntry(`${y}-01-01`,"Yılbaşı"),holidayEntry(`${y}-04-23`,"Ulusal Egemenlik ve Çocuk Bayramı"),
+    holidayEntry(`${y}-05-01`,"Emek ve Dayanışma Günü"),holidayEntry(`${y}-05-19`,"Atatürk'ü Anma, Gençlik ve Spor Bayramı"),
+    holidayEntry(`${y}-07-15`,"Demokrasi ve Milli Birlik Günü"),holidayEntry(`${y}-08-30`,"Zafer Bayramı"),
+    holidayEntry(`${y}-10-28`,"Cumhuriyet Bayramı Arifesi (13:00 sonrası)",.5),holidayEntry(`${y}-10-29`,"Cumhuriyet Bayramı")
+  ];
+  const m=RELIGIOUS_HOLIDAY_BASES[year];
+  if(m){
+    (m.ramadanEves||[]).forEach(e=>{list.push(holidayEntry(e,"Ramazan Bayramı Arifesi (13:00 sonrası)",.5));for(let i=1;i<=3;i++)list.push(holidayEntry(addIsoDays(e,i),`Ramazan Bayramı ${i}. Gün`))});
+    const e=m.sacrificeEve;list.push(holidayEntry(e,"Kurban Bayramı Arifesi (13:00 sonrası)",.5));for(let i=1;i<=4;i++)list.push(holidayEntry(addIsoDays(e,i),`Kurban Bayramı ${i}. Gün`));
+  }
+  return list.sort((a,b)=>a.date.localeCompare(b.date));
+}
+function holidaysOnDate(iso){return publicHolidaysForYear(Number(iso.slice(0,4))).filter(h=>h.date===iso)}
+function setupCalendarSelectors(){
+  const ms=el("calendarMonthSelect"),ys=el("calendarYearSelect");
+  if(!ms.options.length)MONTH_NAMES.forEach((n,i)=>ms.add(new Option(n,i)));
+  if(!ys.options.length)for(let y=2022;y<=2035;y++)ys.add(new Option(y,y));
+  ms.value=calendarMonth;ys.value=calendarYear;
+}
+function setCalendarFromSelectors(){calendarMonth=Number(el("calendarMonthSelect").value);calendarYear=Number(el("calendarYearSelect").value);renderCalendar()}
+function changeCalendarMonth(d){calendarMonth+=d;if(calendarMonth<0){calendarMonth=11;calendarYear--}if(calendarMonth>11){calendarMonth=0;calendarYear++}calendarYear=Math.max(2022,Math.min(2035,calendarYear));renderCalendar()}
+function goCalendarToday(){const d=new Date();calendarYear=Math.max(2022,Math.min(2035,d.getFullYear()));calendarMonth=d.getMonth();renderCalendar()}
+function setCalendarScope(scope){calendarScope=scope;calendarFocusUser=null;calendarFocusType=null;renderCalendar()}
+function configureCalendarScopeUI(){
+  const tabs=el("calendarScopeTabs"),sub=el("calendarScopeSubtitle");
+  if(isLeader()){
+    tabs.classList.remove("hidden");el("scopeOwnBtn").classList.toggle("active",calendarScope==="own");el("scopeTeamBtn").classList.toggle("active",calendarScope==="team");
+    sub.textContent=calendarScope==="own"
+      ?`${currentUser.name} — kendi izinleri ve Türkiye resmi tatilleri`
+      :(isGeneralManager()?"Tüm personel izinleri ve Türkiye resmi tatilleri":"Yurtdışı Satış ekibi izinleri ve Türkiye resmi tatilleri");
+  }else{tabs.classList.add("hidden");calendarScope="own";sub.textContent=`${currentUser.name} — kendi izinleri ve Türkiye resmi tatilleri`}
+}
+function coversDate(r,iso){return r.type==="Saatlik İzin"?r.date===iso:(r.start&&r.end&&r.start<=iso&&r.end>=iso)}
+function calendarVisibleRequests(iso){
+  let list=requests.filter(r=>!["Reddedildi","Geri Çekildi","Onay Geri Çekildi"].includes(r.status)&&coversDate(r,iso));
+  if(!isLeader()||calendarScope==="own")list=list.filter(r=>r.user===currentUser.username);
+  else list=list.filter(r=>r.user!==currentUser.username);
+  if(calendarFocusUser)list=list.filter(r=>r.user===calendarFocusUser && (calendarFocusType!=="annual"||r.type==="Yıllık Ücretli İzin") && (calendarFocusType!=="hourly"||r.type==="Saatlik İzin"));
+  return list;
+}
+function renderHolidayList(){
+  const list=publicHolidaysForYear(calendarYear).filter(h=>Number(h.date.slice(5,7))-1===calendarMonth);
+  el("holidayListTitle").textContent=`${MONTH_NAMES[calendarMonth]} ${calendarYear} Resmi Tatilleri`;
+  el("holidayList").innerHTML=list.length?list.map(h=>`<div class="holiday-row"><b>${trDate(h.date)}</b><span>${h.name}</span><span>${h.fraction===.5?"Yarım Gün":"Tam Gün"}</span></div>`).join(""):'<div class="muted" style="font-size:13px">Bu ay resmi tatil bulunmuyor.</div>';
+}
+function renderCalendarFocusPanel(){
+  const p=el("calendarFocusPanel");
+  if(!calendarFocusUser){p.classList.add("hidden");p.innerHTML="";return}
+  const u=users.find(x=>x.username===calendarFocusUser) || {name:calendarFocusUser,annualEntitlement:0,department:""};
+  const rs=requests.filter(r=>r.user===calendarFocusUser&&r.status==="Onaylandı");
+  const annual=rs.filter(r=>r.type==="Yıllık Ücretli İzin"),hourly=rs.filter(r=>r.type==="Saatlik İzin");
+  const used=annual.reduce((a,b)=>a+Number(b.durationDays||0),0),hrs=hourly.reduce((a,b)=>a+Number(b.durationHours||0),0);
+  const focus=(calendarFocusType==="hourly"?hourly:annual).slice().sort((a,b)=>String(b.date||b.start||"").localeCompare(String(a.date||a.start||"")));
+  p.innerHTML=`<div class="calendar-focus-head"><div><div class="calendar-focus-name">${u.name}</div><div class="muted">${u.department||""}</div><div class="calendar-focus-stats"><div class="calendar-focus-stat">Yıllık Hak<b>${formatWorkDays(u.annualEntitlement)}</b></div><div class="calendar-focus-stat">Kullanılan<b>${formatWorkDays(used)}</b></div><div class="calendar-focus-stat">Kalan<b>${formatWorkDays(Number(u.annualEntitlement)-used)}</b></div><div class="calendar-focus-stat">Saatlik<b>${formatHours(hrs)}</b></div></div></div><button class="btn btn-ghost" onclick="calendarFocusUser=null;calendarFocusType=null;renderCalendar()">Tüm Takvimi Göster</button></div><div class="focus-list">${focus.map(r=>`<button class="focus-chip" onclick="jumpToLeaveDate('${r.date||r.start}')">${dateText(r)} • ${durationText(r)}</button>`).join("")||'<span class="muted">Kayıt bulunmuyor.</span>'}</div>`;
+  p.classList.remove("hidden");
+}
+function jumpToLeaveDate(iso){if(!iso)return;calendarYear=Number(iso.slice(0,4));calendarMonth=Number(iso.slice(5,7))-1;renderCalendar()}
+function openEmployeeLeaveCalendar(username,type="annual"){
+  calendarScope="team";calendarFocusUser=username;calendarFocusType=type;
+  const rs=requests.filter(r=>r.user===username&&r.status==="Onaylandı"&&(type==="annual"?r.type==="Yıllık Ücretli İzin":r.type==="Saatlik İzin")).sort((a,b)=>String(b.date||b.start||"").localeCompare(String(a.date||a.start||"")));
+  if(rs[0])jumpToLeaveDate(rs[0].date||rs[0].start);showPage("calendar");
+}
+function renderCalendar(){
+  if(!currentUser)return;setupCalendarSelectors();configureCalendarScopeUI();renderCalendarFocusPanel();
+  const c=el("calendar");c.innerHTML="";
+  ["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"].forEach(d=>c.innerHTML+=`<div class="dayname">${d}</div>`);
+  const first=new Date(calendarYear,calendarMonth,1),offset=(first.getDay()+6)%7;for(let i=0;i<offset;i++)c.innerHTML+='<div class="day empty"></div>';
+  const days=new Date(calendarYear,calendarMonth+1,0).getDate();
+  for(let day=1;day<=days;day++){
+    const iso=`${calendarYear}-${String(calendarMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`,dow=new Date(iso+"T12:00:00").getDay(),hs=holidaysOnDate(iso),ev=calendarVisibleRequests(iso);
+    c.innerHTML+=`<div class="day ${dow===0||dow===6?"weekend":""} ${hs.length?"holiday-day":""}"><div class="num">${day}</div>${hs.map(h=>`<div class="holiday-event">🇹🇷 ${h.name}${h.fraction===.5?" • Yarım Gün":""}</div>`).join("")}${ev.map(r=>`<div class="event ${calendarFocusUser?"focused-leave":""}">${r.name.split(" ")[0]} • ${r.type==="Saatlik İzin"?(r.startTime||"").slice(0,5)+"-"+(r.endTime||"").slice(0,5):r.type}</div>`).join("")}</div>`;
+  }
+  renderHolidayList();
+}
+
+/* ---------------- Manager approvals ---------------- */
+function pendingManagerRequests(){
+  return isLeader()?requests.filter(r=>r.manager===currentUser.username&&r.status==="Bekliyor"):[];
+}
+function managerApprovedRequests(){
+  return isManager()?requests.filter(r=>r.manager===currentUser.username&&r.status==="Onaylandı"):[];
+}
+function updateApprovalNotifications(showToast=false){
+  if(!isLeader())return;
+  const n=pendingManagerRequests().length;
+  ["approvalBadge","pendingTabBadge"].forEach(id=>{const x=el(id);if(x){x.textContent=n;x.classList.toggle("hidden",n===0)}});
+  if(showToast&&n>lastPendingCount&&n>0){
+    const who=isGeneralManager()?"Kahtan Yunus":"Ekibiniz";
+    showInAppToast("🔔 Yeni Onay Bekliyor",`Onayınızı bekleyen <b>${n}</b> izin talebi bulunuyor.`);
+    showDesktopNotification("MARS ELEVATOR • Onay Bekliyor",`${who}: ${n} izin talebi onayınızı bekliyor.`);
+  }
+  lastPendingCount=n;
+}
+function showApprovalSection(section){
+  if(isGeneralManager())section="pending";
+  currentApprovalSection=section;
+  el("approvalPendingSection").classList.toggle("hidden",section!=="pending");
+  el("approvalApprovedSection").classList.toggle("hidden",section!=="approved");
+  el("tabPending").classList.toggle("active",section==="pending");
+  el("tabApproved").classList.toggle("active",section==="approved");
+  if(section==="pending")renderApprovals();else renderApprovedPeople();
+}
+function renderApprovalAlert(n){
+  const detail=isGeneralManager()?"Kahtan Yunus tarafından gönderilen talepler aşağıda listelenir.":"Aşağıdaki talepleri inceleyebilirsiniz.";
+  el("approvalAlert").innerHTML=n?`<div class="approval-alert"><div><div class="approval-alert-title"><span class="notification-dot"></span>${n} izin talebi onayınızı bekliyor</div><div class="approval-alert-text">${detail}</div></div><div class="notification-badge">${n}</div></div>`:`<div class="card" style="margin-bottom:14px;color:#2e7d32"><b>✓ Bekleyen izin talebi bulunmuyor.</b></div>`;
+}
+function renderApprovals(){
+  if(!isLeader())return;
+  const p=pendingManagerRequests();renderApprovalAlert(p.length);
+  el("approvalList").innerHTML=p.map(r=>{
+    const actions=isGeneralManager()
+      ?`<button class="btn btn-ok" onclick="decide('${r.id}','Onaylandı')">Onayla</button>`
+      :`<button class="btn btn-danger" onclick="decide('${r.id}','Reddedildi')">Reddet</button><button class="btn btn-ok" onclick="decide('${r.id}','Onaylandı')">Onayla</button>`;
+    return `<div class="approval-card pending-attention"><div><div style="font-weight:900">${r.name}</div><div>${r.type} • <b>${durationText(r)}</b></div><div class="approval-meta">${dateText(r)}${r.note?" • Sebep: "+r.note:""}</div></div><div class="approval-actions">${actions}</div></div>`;
+  }).join("");
+  if(currentApprovalSection==="approved")renderApprovedPeople();
+}
+async function decide(id,status){try{await rpc("mars_manager_decide",{p_token:sessionToken,p_request_id:id,p_status:status});await refreshAll()}catch(e){alert(e.message)}}
+function approvalDateText(r){if(!r.decisionAt)return"—";const d=new Date(r.decisionAt);return isNaN(d)?"—":d.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+function renderApprovedPeople(){
+  if(!isManager())return;
+  const list=managerApprovedRequests(),g={};list.forEach(r=>(g[r.user]??=[]).push(r));
+  el("approvedPeopleList").innerHTML=Object.entries(g).map(([username,rs])=>{const u=users.find(x=>x.username===username)||{name:rs[0].name,department:rs[0].department};const annual=rs.filter(r=>r.type==="Yıllık Ücretli İzin").reduce((a,b)=>a+Number(b.durationDays||0),0),hrs=rs.filter(r=>r.type==="Saatlik İzin").reduce((a,b)=>a+Number(b.durationHours||0),0);return `<div class="approved-person-card" onclick="openApprovedEmployeeHistory('${username}')"><div class="approved-person-name">${u.name}</div><div class="approved-person-meta">${u.department||""}</div><div class="approved-person-stats"><div class="approved-person-stat">Onaylı Kayıt<b>${rs.length}</b></div><div class="approved-person-stat">Yıllık İzin<b>${formatWorkDays(annual)}</b></div><div class="approved-person-stat">Saatlik<b>${formatHours(hrs)}</b></div></div></div>`}).join("")||'<div class="card" style="grid-column:1/-1">Henüz onaylanmış izin kaydı bulunmuyor.</div>';
+}
+function openApprovedEmployeeHistory(username){
+  const rs=managerApprovedRequests().filter(r=>r.user===username).sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||""))),u=users.find(x=>x.username===username)||{name:rs[0]?.name||username,department:""};
+  el("modalTitle").textContent=`${u.name} — Onaylanmış İzinler`;
+  el("modalContent").innerHTML=`<div class="table-wrap" style="margin-top:14px"><table class="history-table"><thead><tr><th>İzin Türü</th><th>İzin Tarihi / Saati</th><th>Süre</th><th>Sebep / Açıklama</th><th>Onay Tarihi - Saati</th><th>İşlem</th></tr></thead><tbody>${rs.map(r=>`<tr><td><b>${r.type}</b></td><td>${dateText(r)}</td><td>${durationText(r)}</td><td class="history-note">${r.note||"Açıklama girilmemiş"}</td><td>${approvalDateText(r)}</td><td><button class="revoke-btn" onclick="revokeApproval('${r.id}')">Onayı Geri Çek</button></td></tr>`).join("")}</tbody></table></div>`;
+  el("detailModal").classList.remove("hidden");
+}
+async function revokeApproval(id){if(!confirm("Verilmiş müdür onayını geri çekmek istediğinize emin misiniz?"))return;try{await rpc("mars_revoke_approval",{p_token:sessionToken,p_request_id:id});closeModal();await refreshAll();alert("Onay geri çekildi. Personel artık talebi kendi hesabından geri çekebilir.")}catch(e){alert(e.message)}}
+
+/* ---------------- Team ---------------- */
+function effectiveTeamRecord(r){
+  return r.status==="Onaylandı" || r.status==="Bildirildi";
+}
+function isDutyRecordType(type){return type==="Fuar" || type==="İş Seyahati";}
+function isLeaveRecordType(type){return !isDutyRecordType(type);}
+function recordRange(r){
+  const s=r.type==="Saatlik İzin"?r.date:r.start;
+  const e=r.type==="Saatlik İzin"?r.date:r.end;
+  return {start:s,end:e};
+}
+function recordTouchesDate(r,iso){
+  if(!effectiveTeamRecord(r))return false;
+  const x=recordRange(r);
+  return !!x.start && !!x.end && x.start<=iso && x.end>=iso;
+}
+function recordCountDaysText(rs){
+  const list=rs.filter(effectiveTeamRecord);
+  const days=list.reduce((a,b)=>a+Number(b.durationDays||0),0);
+  if(!list.length)return "0";
+  return days>0?`${list.length} Kayıt • ${formatWorkDays(days)}`:`${list.length} Kayıt`;
+}
+function renderTeamSummary(){
+  const today=new Date();
+  const iso=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+  const active=requests.filter(r=>recordTouchesDate(r,iso)&&r.type!=="Görev");
+  const leaveUsers=new Set(active.filter(r=>isLeaveRecordType(r.type)).map(r=>r.user));
+  const fairUsers=new Set(active.filter(r=>isDutyRecordType(r.type)).map(r=>r.user));
+  const pending=pendingManagerRequests().length;
+  el("teamSummaryPeople").textContent=`${users.length} Kişi`;
+  el("teamSummaryLeaveToday").textContent=`${leaveUsers.size} Kişi`;
+  el("teamSummaryFairToday").textContent=`${fairUsers.size} Kişi`;
+  el("teamSummaryPending").textContent=`${pending} Talep`;
+}
+function openTeamRecordDetail(username,type){
+  const u=users.find(x=>x.username===username)||{name:username,department:""};
+  const rs=requests.filter(r=>r.user===username&&
+    (type==="Görev"?isDutyRecordType(r.type):r.type===type)&&
+    effectiveTeamRecord(r))
+    .sort((a,b)=>String(b.date||b.start||"").localeCompare(String(a.date||a.start||"")));
+  el("modalTitle").textContent=`${u.name} — ${type} Kayıtları`;
+  el("modalContent").innerHTML=rs.length?`
+    <div class="table-wrap" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Tür</th><th>Tarih</th><th>Süre</th><th>Açıklama / Neden</th><th>Durum</th></tr></thead>
+        <tbody>${rs.map(r=>`<tr><td><b>${r.type}</b></td><td>${dateText(r)}</td><td>${durationText(r)}</td><td>${r.note||"Açıklama girilmemiş"}</td><td>${statusBadge(r.status)}</td></tr>`).join("")}</tbody>
+      </table>
+    </div>`:'<p class="muted">Kayıt bulunmuyor.</p>';
+  el("detailModal").classList.remove("hidden");
+}
+function setupTeamTimelineYear(){
+  const s=el("teamTimelineYear");if(!s)return;
+  if(!s.options.length){
+    const now=new Date().getFullYear();
+    for(let y=2022;y<=2035;y++)s.add(new Option(y,y));
+    s.value=Math.max(2022,Math.min(2035,now));
+  }
+}
+function setupTeamTimelinePeople(){
+  const s=el("teamTimelinePerson");if(!s)return;
+  const selected=s.value||"all";
+  s.innerHTML='<option value="all">Tüm Personel</option>';
+  users.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"tr")).forEach(u=>{
+    s.add(new Option(u.name,u.username));
+  });
+  s.value=[...s.options].some(o=>o.value===selected)?selected:"all";
+}
+function dayOfYear(iso){
+  const d=new Date(iso+"T12:00:00");
+  const start=new Date(d.getFullYear(),0,1,12,0,0);
+  return Math.floor((d-start)/86400000)+1;
+}
+function daysInYear(y){return ((y%4===0&&y%100!==0)||y%400===0)?366:365}
+function timelineClass(type){return isDutyRecordType(type)?"fair":"leave"}
+function updateTeamSelectionSummary(list,year,personFilter,typeFilter){
+  const personText=personFilter==="all"?"Tüm Personel":(users.find(u=>u.username===personFilter)?.name||personFilter);
+  const typeText=typeFilter==="all"?"Tüm Kayıtlar":typeFilter;
+
+  const workdayTotal=list
+    .filter(r=>r.type!=="Saatlik İzin")
+    .reduce((a,b)=>a+Number(b.durationDays||0),0);
+  const hourTotal=list
+    .filter(r=>r.type==="Saatlik İzin")
+    .reduce((a,b)=>a+Number(b.durationHours||0),0);
+
+  let durationParts=[];
+  if(workdayTotal>0)durationParts.push(formatWorkDays(workdayTotal));
+  if(hourTotal>0)durationParts.push(formatHours(hourTotal));
+  if(!durationParts.length)durationParts.push("0");
+
+  const last=list.slice().sort((a,b)=>String(b.date||b.start||"").localeCompare(String(a.date||a.start||"")))[0];
+  let lastText="—";
+  if(last){
+    const note=last.note||"Açıklama girilmemiş";
+    const shownType=isDutyRecordType(last.type)?`Görev / ${last.type}`:last.type;
+    lastText=`${dateText(last)} • ${last.name||last.user} • ${shownType} • ${note}`;
+  }
+
+  el("selSummaryPerson").textContent=personText;
+  el("selSummaryType").textContent=typeText;
+  el("selSummaryCount").textContent=`${list.length} Kayıt`;
+  el("selSummaryDuration").textContent=durationParts.join(" + ");
+  el("selSummaryLast").textContent=lastText;
+  el("selSummaryLast").title=lastText;
+}
+function openTimelineRecordDetail(id){
+  const r=requests.find(x=>String(x.id)===String(id));
+  if(!r)return;
+
+  const shownGroup=isDutyRecordType(r.type)?"Görev":"İzin";
+  const realType=isDutyRecordType(r.type)?`Görev / ${r.type}`:r.type;
+  const note=r.note||"Açıklama girilmemiş";
+
+  el("modalTitle").textContent=`${r.name||r.user} — ${shownGroup} Detayı`;
+  el("modalContent").innerHTML=`
+    <div class="table-wrap" style="margin-top:14px">
+      <table>
+        <tbody>
+          <tr><th style="width:180px">Personel</th><td><b>${r.name||r.user}</b></td></tr>
+          <tr><th>Kayıt Türü</th><td>${realType}</td></tr>
+          <tr><th>Tarih</th><td>${dateText(r)}</td></tr>
+          <tr><th>Süre</th><td>${durationText(r)}</td></tr>
+          <tr><th>Açıklama / Neden</th><td>${note}</td></tr>
+          <tr><th>Durum</th><td>${statusBadge(r.status)}</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+  el("detailModal").classList.remove("hidden");
+}
+
+function renderTeamTimeline(){
+  const target=el("teamTimeline");if(!target)return;
+  setupTeamTimelineYear();
+  setupTeamTimelinePeople();
+
+  const year=Number(el("teamTimelineYear").value);
+  const personFilter=el("teamTimelinePerson").value;
+  const typeFilter=el("teamTimelineFilter").value;
+  const from=`${year}-01-01`,to=`${year}-12-31`,total=daysInYear(year);
+
+  let list=requests.filter(r=>{
+    if(!effectiveTeamRecord(r))return false;
+    if(r.type==="Görev")return false; // Eski kayıt varsa gösterme.
+    if(personFilter!=="all"&&r.user!==personFilter)return false;
+    if(typeFilter==="Görev"&&!isDutyRecordType(r.type))return false;
+    if(typeFilter!=="all"&&typeFilter!=="Görev"&&r.type!==typeFilter)return false;
+    const x=recordRange(r);
+    return x.start&&x.end&&x.end>=from&&x.start<=to;
+  }).sort((a,b)=>String(a.start||a.date||"").localeCompare(String(b.start||b.date||"")));
+
+  updateTeamSelectionSummary(list,year,personFilter,typeFilter);
+
+  if(!list.length){
+    target.innerHTML='<div class="timeline-empty">Seçilen personel / kayıt türü / yıl için kayıt bulunmuyor.</div>';
+    return;
+  }
+
+  target.innerHTML=list.map(r=>{
+    const x=recordRange(r);
+    const clippedStart=x.start<from?from:x.start;
+    const clippedEnd=x.end>to?to:x.end;
+    const startDay=dayOfYear(clippedStart);
+    const endDay=dayOfYear(clippedEnd);
+    const left=((startDay-1)/total)*100;
+    const width=Math.max(((endDay-startDay+1)/total)*100,0.8);
+    const reason=(r.note||"Açıklama girilmemiş").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const who=(r.name||r.user).replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const rawType=r.type.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const type=isDutyRecordType(r.type)?`Görev / ${rawType}`:rawType;
+    const title=`${who} | ${type} | ${dateText(r)} | ${reason}`;
+    const symbol=isDutyRecordType(r.type)?"G":"İ";
+    return `<div class="timeline-row">
+      <div class="timeline-info">
+        <div class="timeline-name">${who} • ${type}</div>
+        <div class="timeline-reason" title="${reason}">${reason}</div>
+      </div>
+      <div class="timeline-track">
+        <div class="timeline-bar ${timelineClass(r.type)}"
+             style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%"
+             title="${title} — detay için tıklayın"
+             onclick="openTimelineRecordDetail('${r.id}')">
+          <span class="timeline-bar-symbol">${symbol}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function renderTeam(){
+  if(!isLeader())return;
+  const body=el("teamBody");if(!body)return;
+
+  // users already contains Kahtan + his team; manager is intentionally included in V20.
+  body.innerHTML=users.map(u=>{
+    const rs=requests.filter(r=>r.user===u.username);
+    const effective=rs.filter(effectiveTeamRecord);
+    const annual=effective.filter(r=>r.type==="Yıllık Ücretli İzin").reduce((a,b)=>a+Number(b.durationDays||0),0);
+    const hrs=effective.filter(r=>r.type==="Saatlik İzin").reduce((a,b)=>a+Number(b.durationHours||0),0);
+    const duties=rs.filter(r=>isDutyRecordType(r.type));
+    const pending=rs.filter(r=>r.status==="Bekliyor"&&r.manager===currentUser.username).length;
+    const roleBadge=u.role==="general_manager"
+      ?' <span class="badge ok">Genel Müdür</span>'
+      :(u.role==="manager"?' <span class="badge ok">Yurt Dışı Satış Müdürü</span>':"");
+    return `<tr>
+      <td><b>${u.name}</b>${roleBadge}</td>
+      <td>${u.department||"-"}</td>
+      <td>${formatWorkDays(u.annualEntitlement)}</td>
+      <td><button class="team-link" onclick="openEmployeeLeaveCalendar('${u.username}','annual')">${formatWorkDays(annual)}</button></td>
+      <td><button class="team-link remaining" onclick="openEmployeeLeaveCalendar('${u.username}','annual')">${formatWorkDays(Number(u.annualEntitlement)-annual)}</button></td>
+      <td><button class="team-link" onclick="openEmployeeLeaveCalendar('${u.username}','hourly')">${formatHours(hrs)}</button></td>
+      <td><button class="record-pill fair" onclick="openTeamRecordDetail('${u.username}','Görev')">${recordCountDaysText(duties)}</button></td>
+      <td>${pending}</td>
+    </tr>`;
+  }).join("");
+
+  renderTeamSummary();
+  setupTeamTimelineYear();
+  setupTeamTimelinePeople();
+  renderTeamTimeline();
+}
+
+/* ---------------- User management ---------------- */
+function renderUsers(){
+  const body=el("usersBody");if(!body||!isManager())return;
+  body.innerHTML=users.map(u=>{
+    const role=roleLabel(u.role);
+    const action=u.role==="personel"?`<button class="user-delete-btn" onclick="deleteUser('${u.username}')">Kullanıcıyı Sil</button>`:"—";
+    return `<tr><td><b>${u.name}</b></td><td>${u.username}</td><td>${role}</td><td>${u.department||"-"}</td><td>${formatWorkDays(u.annualEntitlement)}</td><td>${action}</td></tr>`;
+  }).join("");
+}
+async function addUser(){
+  try{
+    const d=await rpc("mars_add_user",{p_token:sessionToken,p_username:el("newUsername").value,p_full_name:el("newFullName").value,p_department:el("newDepartment").value,p_password:el("newPassword").value});
+    alert(`Kullanıcı oluşturuldu.\nKullanıcı Adı: ${d.username}\nGeçici Şifre: ${d.password}`);
+    el("newFullName").value="";el("newUsername").value="";await refreshAll();
+  }catch(e){alert(e.message)}
+}
+async function deleteUser(username){if(!confirm(username+" kullanıcısını kapatmak istediğinize emin misiniz? Geçmiş izin kayıtları korunur."))return;try{await rpc("mars_delete_user",{p_token:sessionToken,p_username:username});await refreshAll()}catch(e){alert(e.message)}}
+
+/* ---------------- Detail modal ---------------- */
+function openLeaveDetail(kind){
+  const mine=myReqs().filter(r=>!["Reddedildi","Geri Çekildi","Onay Geri Çekildi"].includes(r.status));
+  let title="",rows=[];
+  if(kind==="annual"||kind==="used"){title="Yıllık Ücretli İzin Detayları";rows=mine.filter(r=>r.type==="Yıllık Ücretli İzin"&&ownDirectRecordStatus(r))}
+  else if(kind==="hourly"){title="Saatlik İzin Detayları";rows=mine.filter(r=>r.type==="Saatlik İzin"&&ownDirectRecordStatus(r))}
+  else if(kind==="health"){title="Sağlık Raporu Detayları";rows=mine.filter(r=>r.type==="Sağlık Raporu"&&["Bildirildi","Onaylandı"].includes(r.status))}
+  else if(kind==="admin"){title="İdari İzin Detayları";rows=mine.filter(r=>r.type==="İdari İzin"&&ownDirectRecordStatus(r))}
+  else if(kind==="travel"){title="İş Seyahati Detayları";rows=mine.filter(r=>r.type==="İş Seyahati"&&ownDirectRecordStatus(r))}
+  el("modalTitle").textContent=title;
+  el("modalContent").innerHTML=rows.length?`<div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>Tür</th><th>Tarih</th><th>Süre</th><th>Durum</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.type}</td><td>${dateText(r)}</td><td>${durationText(r)}</td><td>${statusBadge(r.status)}</td></tr>`).join("")}</tbody></table></div>`:'<p class="muted">Kayıt bulunmuyor.</p>';
+  el("detailModal").classList.remove("hidden");
+}
+function closeModal(){el("detailModal").classList.add("hidden")}
+
+window.addEventListener("load",init);
+</script>
+</body>
+</html>
