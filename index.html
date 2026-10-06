@@ -1646,7 +1646,7 @@ async function login(){
       el("newRequestTopBtn").textContent="+ Yeni İzin Kaydı";
       el("requestHeading").textContent="Yeni İzin Kaydı";
       el("requestSubmitBtn").textContent="İzin Kaydet";
-      el("myRequestsTitle").textContent="Son İzin Kayıtlarım";
+      if(el("myRequestsTitle")) el("myRequestsTitle").textContent="Son İzin Kayıtlarım";
       el("approvalNavText").textContent="Kahtan Onayları";
       el("teamNavText").textContent="Personel İzinleri";
       el("teamHeading").textContent="Personel İzinleri";
@@ -1658,7 +1658,7 @@ async function login(){
       el("newRequestTopBtn").textContent="+ Yeni İzin Talebi";
       el("requestHeading").textContent="Yeni İzin Talebi";
       el("requestSubmitBtn").textContent="Talebi Gönder";
-      el("myRequestsTitle").textContent="Son İzin Taleplerim";
+      if(el("myRequestsTitle")) el("myRequestsTitle").textContent="Son İzin Taleplerim";
       el("approvalNavText").textContent="Müdür Onayları";
       el("teamNavText").textContent="Ekibim";
       el("teamHeading").textContent="Ekibim";
@@ -1861,7 +1861,7 @@ function openAllMyRequests(){
   const mine=myReqs().slice().sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
   el("modalTitle").textContent="Tüm Taleplerim";
   el("modalContent").innerHTML=`<div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>Tür</th><th>Tarih</th><th>Süre</th><th>Durum</th></tr></thead><tbody>${mine.map(r=>`<tr><td>${r.type}</td><td>${dateText(r)}</td><td>${durationText(r)}</td><td>${statusBadge(r.status)}</td></tr>`).join("")||'<tr><td colspan="4" class="muted">Henüz kayıt yok.</td></tr>'}</tbody></table></div>`;
-  el("modal").classList.remove("hidden");
+  el("detailModal").classList.remove("hidden");
 }
 function handleTopSearch(event){
   if(event.key!=="Enter")return;
@@ -2317,5 +2317,6 @@ function closeModal(){el("detailModal").classList.add("hidden")}
 
 window.addEventListener("load",init);
 </script>
+<!-- V23.2.1 LOGIN FIX -->
 </body>
 </html>
