@@ -1747,6 +1747,13 @@ function formatHours(h){
   const total=Math.round(Number(h||0)*60),hh=Math.floor(total/60),mm=total%60;
   return mm?`${hh} Saat ${mm} Dk`:`${hh} Saat`;
 }
+
+function localIsoDate(value){
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
 function trDate(s){if(!s)return"";const [y,m,d]=s.split("-");return `${d}.${m}.${y}`}
 function dateText(r){
   if(r.type==="Saatlik İzin")return `${trDate(r.date)} • ${(r.startTime||"").slice(0,5)}-${(r.endTime||"").slice(0,5)}`;
@@ -2317,6 +2324,6 @@ function closeModal(){el("detailModal").classList.add("hidden")}
 
 window.addEventListener("load",init);
 </script>
-<!-- V23.2.1 LOGIN FIX -->
+<!-- V23.2.2 LOCAL DATE FIX -->
 </body>
 </html>
