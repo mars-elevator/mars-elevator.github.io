@@ -714,6 +714,57 @@ body{background:var(--dash-bg)}
 @media(max-width:880px){.app{grid-template-columns:1fr}.sidebar{position:relative}.logo{display:none}.nav{display:grid;grid-template-columns:repeat(3,1fr)}.side-user{display:none}.topbar{position:relative;grid-template-columns:1fr auto;height:auto;padding:14px 16px}.top-search{grid-column:1/-1;grid-row:2}.dashboard-shell{padding:14px 16px 24px}.hero-copy{width:68%;padding:25px}.dashboard-hero{min-height:200px}.dashboard-stats{grid-template-columns:repeat(2,1fr)}.dashboard-grid{grid-template-columns:1fr}.dashboard-grid>.dashboard-panel:last-child{grid-column:auto}.dashboard-team-list{display:block}}
 @media(max-width:560px){.nav{grid-template-columns:repeat(2,1fr)}.topbar-title{font-size:18px}.help-chip{display:none}.dashboard-hero{background-position:62% center;min-height:220px}.dashboard-hero:before{background:linear-gradient(90deg,rgba(240,247,253,.98),rgba(240,247,253,.93) 60%,rgba(240,247,253,.25))}.hero-copy{width:82%;padding:24px 22px}.hero-title{font-size:26px}.dashboard-stats{grid-template-columns:1fr}.dashboard-grid{grid-template-columns:1fr}.dashboard-stat{min-height:82px}.top-user{padding-left:0}.notification-panel{right:-120px;width:min(340px,calc(100vw - 30px))}}
 
+
+/* V23.3 DASHBOARD FIX */
+.logo img{display:none!important}
+.mars-wordmark{padding:8px 14px 18px!important;color:#fff;position:relative;z-index:1}
+.mars-wordmark-main{font-size:29px;line-height:1;font-weight:800;letter-spacing:5px}
+.mars-wordmark-main .mars-a{position:relative}
+.mars-wordmark-main .mars-a:after{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:#35c978;left:50%;top:47%;transform:translate(-50%,-50%)}
+.mars-wordmark-sub{margin-top:6px;font-size:11px;letter-spacing:5.1px;font-weight:600;color:#dce8f1}
+
+/* Keep the dashboard title corporate; sidebar remains "Ana Sayfa". */
+#page-dashboard:not(.hidden) ~ *{}
+.dashboard-shell{max-width:1500px}
+
+/* Compact four summary cards so they remain elegant on office monitors. */
+.dashboard-stat{min-height:84px;padding:12px 13px;gap:11px}
+.dashboard-stat-icon{width:44px;height:44px;border-radius:12px}
+.dashboard-stat-icon svg{width:23px;height:23px}
+.dashboard-stat-label{font-size:11px;line-height:1.22}
+.dashboard-stat-value{font-size:22px;margin-top:3px}
+.dashboard-stat-arrow{font-size:20px}
+
+/* Always keep Takvim / Son Taleplerim / Ekip Durumu in one row on normal desktop widths. */
+.dashboard-grid{
+  grid-template-columns:minmax(0,.95fr) minmax(0,1.18fr) minmax(0,.95fr)!important;
+  gap:12px!important;
+}
+.dashboard-panel-head{height:54px;padding:0 14px}
+.dashboard-panel-title{font-size:15px}
+.mini-calendar{padding:11px 13px 10px}
+.dashboard-request-list{padding:3px 12px 9px}
+.dashboard-team-list{padding:5px 12px 9px}
+.request-empty{min-height:225px;padding:22px 16px}
+
+/* The old 1180px rule caused the third card to drop to a new line too early. */
+@media(max-width:1180px) and (min-width:921px){
+  .dashboard-grid{
+    grid-template-columns:minmax(0,.92fr) minmax(0,1.10fr) minmax(0,.92fr)!important;
+  }
+  .dashboard-grid>.dashboard-panel:last-child{grid-column:auto!important}
+  .dashboard-team-list{display:block!important}
+  .topbar{grid-template-columns:minmax(150px,.8fr) minmax(250px,390px) auto}
+  .dashboard-stat{padding:11px 10px;gap:9px}
+  .dashboard-stat-icon{width:40px;height:40px}
+  .dashboard-stat-label{font-size:10px}
+  .dashboard-stat-value{font-size:20px}
+}
+@media(max-width:920px){
+  .dashboard-grid{grid-template-columns:1fr!important}
+  .dashboard-grid>.dashboard-panel:last-child{grid-column:auto!important}
+}
+
 </style>
 <script>
 window.MARS_CONFIG={
@@ -750,7 +801,10 @@ window.MARS_CONFIG={
 
 <div id="app" class="app hidden">
   <aside class="sidebar">
-    <div class="logo"><img src="assets/mars_logo.png" alt="MARS ELEVATOR"></div>
+    <div class="logo mars-wordmark" aria-label="MARS ELEVATOR">
+      <div class="mars-wordmark-main">M<span class="mars-a">A</span>RS</div>
+      <div class="mars-wordmark-sub">ELEVATOR</div>
+    </div>
     <div class="nav">
       <button data-page="dashboard" onclick="showPage('dashboard')"><span class="nav-icon">⌂</span><span>Ana Sayfa</span></button>
       <button data-page="request" id="requestNav" onclick="showPage('request')"><span class="nav-icon">▣</span><span>İzin Talebi</span></button>
@@ -1719,7 +1773,7 @@ function showPage(page){
     const nav=document.querySelector(`[data-page="${p}"]`); if(nav)nav.classList.toggle("active",p===page);
   });
   const titles={
-    dashboard:"Ana Sayfa",
+    dashboard:"İzin Yönetim Sistemi",
     request:isGeneralManager()?"İzin Kaydı":"İzin Talebi",
     calendar:"İzin Takvimi",
     approvals:isGeneralManager()?"Kahtan Onayları":"Müdür Onayları",
@@ -1775,16 +1829,18 @@ function renderDashboard(){
   const ent=Number(currentUser.annualEntitlement||0);
   const remaining=Math.max(0,ent-usedDays);
 
-  el("annualEnt").textContent=formatWorkDays(ent);
-  el("annualUsed").textContent=formatWorkDays(usedDays);
-  el("annualRemaining").textContent=formatWorkDays(remaining);
-  el("hourlyUsed").textContent=formatHours(usedHours);
+  const annualEntEl=el("annualEnt"), annualUsedEl=el("annualUsed"),
+        annualRemainingEl=el("annualRemaining"), hourlyUsedEl=el("hourlyUsed");
+  if(annualEntEl) annualEntEl.textContent=formatWorkDays(ent);
+  if(annualUsedEl) annualUsedEl.textContent=formatWorkDays(usedDays);
+  if(annualRemainingEl) annualRemainingEl.textContent=formatWorkDays(remaining);
+  if(hourlyUsedEl) hourlyUsedEl.textContent=formatHours(usedHours);
 
   const firstName=String(currentUser.name||"").trim().split(/\s+/)[0]||"";
-  el("dashboardGreetingName").textContent=firstName;
+  if(el("dashboardGreetingName")) el("dashboardGreetingName").textContent=firstName;
   const now=new Date();
   const dateTextLong=new Intl.DateTimeFormat("tr-TR",{day:"numeric",month:"long",year:"numeric",weekday:"long"}).format(now);
-  el("dashboardGreetingDate").textContent="Bugün "+dateTextLong.charAt(0).toUpperCase()+dateTextLong.slice(1);
+  if(el("dashboardGreetingDate")) el("dashboardGreetingDate").textContent="Bugün "+dateTextLong.charAt(0).toUpperCase()+dateTextLong.slice(1);
 
   const tips={
     statAnnualEnt:`Toplam yıllık hak: ${formatWorkDays(ent)}\nKullanılan: ${formatWorkDays(usedDays)}\nKalan: ${formatWorkDays(remaining)}`,
@@ -1794,9 +1850,25 @@ function renderDashboard(){
   };
   Object.entries(tips).forEach(([id,t])=>{const n=el(id);if(n)n.dataset.tooltip=t});
 
-  renderDashboardMiniCalendar();
-  renderDashboardRecentRequests(mine);
-  renderDashboardTeamStatus();
+  // Her blok bağımsız çalışır. Takvimde bir sorun olsa bile diğer bloklar boş kalmaz.
+  try{ renderDashboardMiniCalendar(); }
+  catch(err){
+    console.error("Mini calendar render error",err);
+    const host=el("dashboardMiniCalendar");
+    if(host)host.innerHTML='<div class="request-empty"><div><b>Takvim yüklenemedi.</b><span>Sayfayı yenileyebilirsiniz.</span></div></div>';
+  }
+  try{ renderDashboardRecentRequests(mine); }
+  catch(err){
+    console.error("Recent requests render error",err);
+    const host=el("dashboardRecentRequests");
+    if(host)host.innerHTML='<div class="request-empty"><div><b>Henüz talebiniz bulunmuyor.</b></div></div>';
+  }
+  try{ renderDashboardTeamStatus(); }
+  catch(err){
+    console.error("Team status render error",err);
+    const host=el("dashboardTeamList");
+    if(host)host.innerHTML='<div class="request-empty"><div><b>Ekip bilgisi yüklenemedi.</b></div></div>';
+  }
 }
 
 function dashboardRequestActiveOn(r,iso){
@@ -1825,10 +1897,12 @@ function renderDashboardMiniCalendar(){
   const cells=days.map(x=>{
     const iso=localIsoDate(x.date);
     const req=mine.find(r=>dashboardRequestActiveOn(r,iso) && !["Geri Çekildi"].includes(r.status));
-    const hol=holidaysOnDate(iso).length>0;
+    let holidayItems=[];
+    try{holidayItems=(typeof holidaysOnDate==="function" ? holidaysOnDate(iso) : []) || [];}catch(_e){holidayItems=[];}
+    const hol=holidayItems.length>0;
     const weekend=[0,6].includes(x.date.getDay());
     const cls=["mini-day",x.out?"out":"",weekend?"weekend":"",iso===todayIso?"today":"",req?dashboardRequestDotClass(req):"",(!req&&hol)?"holiday":""].filter(Boolean).join(" ");
-    return `<div class="${cls}" title="${hol?holidaysOnDate(iso).map(h=>h.name).join(', '):(req?`${req.type} • ${req.status}`:'')}">${x.num}</div>`;
+    return `<div class="${cls}" title="${hol?holidayItems.map(h=>h.name).join(', '):(req?`${req.type} • ${req.status}`:'')}">${x.num}</div>`;
   }).join("");
   host.innerHTML=`<div class="mini-cal-toolbar"><button onclick="changeDashboardMonth(-1)">‹</button><div class="mini-cal-month">${MONTH_NAMES[m]} ${y}</div><button onclick="changeDashboardMonth(1)">›</button></div><div class="mini-cal-week"><div>Pzt</div><div>Sal</div><div>Çar</div><div>Per</div><div>Cum</div><div>Cmt</div><div>Paz</div></div><div class="mini-cal-days">${cells}</div><div class="mini-legend"><span><i class="mini-dot"></i>Onaylı</span><span><i class="mini-dot pending"></i>Beklemede</span><span><i class="mini-dot bad"></i>Reddedildi</span><span><i class="mini-dot task"></i>Görev</span><span><i class="mini-dot holiday"></i>Resmi Tatil</span></div>`;
 }
@@ -2324,6 +2398,6 @@ function closeModal(){el("detailModal").classList.add("hidden")}
 
 window.addEventListener("load",init);
 </script>
-<!-- V23.2.2 LOCAL DATE FIX -->
+<!-- V23.3 DASHBOARD FIX -->
 </body>
 </html>
