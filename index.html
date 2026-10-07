@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MARS ELEVATOR - Merkezi İzin Yönetimi V23.2</title>
+<title>MARS ELEVATOR - Merkezi Personel Yönetimi V23.7</title>
 <style>
 :root{
   --bg:#f4f6f8; --panel:#fff; --text:#1d2a35; --muted:#6b7a88;
@@ -834,6 +834,25 @@ body{background:var(--dash-bg)}
   .announcement-form-grid textarea{grid-column:1}
 }
 
+
+/* ================= V23.7: Performans + Manuel Giriş + İK Bilgi ================= */
+.v237-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.v237-form-grid .wide{grid-column:1/-1}
+.v237-form-grid textarea{width:100%;resize:vertical;min-height:88px}
+.v237-status-note{padding:11px 12px;border-radius:10px;background:#f4f7f9;border:1px solid #dde6ec;color:#526575;font-size:12px;line-height:1.5}
+.v237-list{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.v237-row{display:grid;grid-template-columns:minmax(160px,1.1fr) minmax(150px,.9fr) minmax(120px,.7fr) minmax(120px,.8fr) auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid #e2e9ee;border-radius:12px;background:#fff}
+.v237-row small{display:block;color:#7b8c99;margin-top:3px}
+.v237-actions{display:flex;gap:7px;justify-content:flex-end}
+.v237-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}
+.v237-kpi{padding:14px;border:1px solid #e1e8ed;border-radius:12px;background:#fff}.v237-kpi span{font-size:11px;color:#768896;display:block}.v237-kpi b{font-size:22px;display:block;margin-top:4px;color:#173248}
+.performance-target-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0 20px}
+.performance-target{border:1px solid #e0e8ed;border-radius:13px;background:#fff;padding:14px;text-align:left;cursor:pointer}.performance-target:hover{box-shadow:0 6px 18px rgba(30,61,85,.08);border-color:#a9c7b8}.performance-target b{display:block;font-size:14px}.performance-target small{color:#768795;display:block;margin-top:3px}.performance-score{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:28px;padding:0 9px;border-radius:999px;background:#eaf7ef;color:#187849;font-weight:900}
+.privacy-chip{display:inline-flex;gap:6px;align-items:center;padding:5px 9px;border-radius:999px;background:#fff4dc;color:#8a5a00;font-size:11px;font-weight:800}
+.hr-info-banner{background:#edf7f2;border:1px solid #cde7da;color:#295a44;border-radius:12px;padding:12px 14px;margin-bottom:14px}
+@media(max-width:1050px){.v237-kpi-grid,.performance-target-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.v237-row{grid-template-columns:1fr 1fr}.v237-actions{justify-content:flex-start}.v237-form-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.v237-kpi-grid,.performance-target-grid,.v237-form-grid,.v237-row{grid-template-columns:1fr}.v237-form-grid .wide{grid-column:1}}
+
 </style>
 <script>
 window.MARS_CONFIG={
@@ -879,6 +898,11 @@ window.MARS_CONFIG={
       <button data-page="request" id="requestNav" onclick="showPage('request')"><span class="nav-icon">＋</span><span>İzin Talebi</span></button>
       <button data-page="calendar" onclick="showPage('calendar')"><span class="nav-icon">▦</span><span>Takvim</span></button>
       <button data-page="myleaves" id="myLeavesNav" onclick="showPage('myleaves')"><span class="nav-icon">▤</span><span>İzinlerim</span></button>
+      <button data-page="manualentry" id="manualEntryNav" onclick="showPage('manualentry')"><span class="nav-icon">⌁</span><span>Manuel Giriş</span></button>
+      <button data-page="performance" id="performanceNav" class="hidden" onclick="showPage('performance')"><span class="nav-icon">★</span><span>Performans</span></button>
+      <button data-page="hrleaveinfo" id="hrLeaveInfoNav" class="hidden" onclick="showPage('hrleaveinfo')"><span class="nav-icon">✓</span><span>İzin Bilgi Akışı</span></button>
+      <button data-page="hrmanual" id="hrManualNav" class="hidden" onclick="showPage('hrmanual')"><span class="nav-icon">⌁</span><span>Manuel Girişler</span></button>
+      <button data-page="announcementsadmin" id="hrAnnouncementsNav" class="hidden" onclick="showPage('announcementsadmin')"><span class="nav-icon">▣</span><span>Bildirim Yönetimi</span></button>
       <button data-page="team" id="teamNav" class="hidden" onclick="showPage('team')"><span class="nav-icon">♙</span><span id="teamNavText">Ekibim</span></button>
       <button data-page="reports" id="reportsNav" class="hidden" onclick="showPage('reports')"><span class="nav-icon">▥</span><span>Raporlar</span></button>
       <button data-page="management" id="managementNav" class="hidden" onclick="showPage('management')"><span class="nav-icon">⚙</span><span>Yönetim</span><span id="approvalBadge" class="notification-badge hidden">0</span></button>
@@ -1127,37 +1151,61 @@ window.MARS_CONFIG={
       </div>
     </section>
 
+
+    <section id="page-announcementsadmin" class="hidden">
+      <div class="page-section-card">
+        <div class="page-section-head">
+          <div>
+            <h2>İK Bildirim Yönetimi</h2>
+            <div class="muted">Bu ekran yalnızca İnsan Kaynakları hesabına açıktır. Yayınlanan duyurular tüm kullanıcıların sol panelinde görünür ve bildirim izni açık cihazlara push bildirimi gönderilir.</div>
+          </div>
+        </div>
+        <div class="management-announcement-box" style="margin-top:0">
+          <div>
+            <h3>Kurumsal Bildirim Yayınla</h3>
+            <div class="muted">Başlık ve metni girin. Bitiş tarihi opsiyoneldir.</div>
+          </div>
+          <div class="announcement-form-grid">
+            <input id="announcementTitle" placeholder="Bildirim başlığı">
+            <input id="announcementExpiry" type="date" title="Opsiyonel bitiş tarihi">
+            <textarea id="announcementBody" rows="4" placeholder="Bildirim metni"></textarea>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" onclick="publishAnnouncement()">Bildirim Yayınla</button></div>
+          <div id="managementAnnouncementList" class="management-announcement-list"></div>
+        </div>
+      </div>
+    </section>
+
     <section id="page-management" class="hidden">
       <div class="page-section-card">
         <div class="page-section-head">
           <div>
             <h2>Yönetim</h2>
-            <div class="muted">Bu alan yalnızca müdür ve genel müdür kullanıcılarına açıktır.</div>
+            <div class="muted">Bu alan müdür, genel müdür ve İnsan Kaynakları kullanıcılarına açıktır.</div>
           </div>
         </div>
         <div class="management-grid">
-          <button class="management-card" onclick="showPage('approvals')">
-            <span class="management-icon">✓</span><div><b>Onay Yönetimi</b><small>Bekleyen talepleri inceleyin ve onay geçmişini görüntüleyin.</small></div><span>›</span>
+          <button id="managementApprovalCard" class="management-card" onclick="showPage('approvals')">
+            <span class="management-icon">✓</span><div><b>İzin Onayları</b><small>Ekibinizden gelen izin ve görev taleplerini onaylayın veya reddedin.</small></div><span>›</span>
           </button>
           <button class="management-card" onclick="showPage('team')">
             <span class="management-icon">♙</span><div><b>Ekip Yönetimi</b><small>Ekip izin haklarını, kullanımları ve görev kayıtlarını inceleyin.</small></div><span>›</span>
           </button>
+          <button id="managementManualCard" class="management-card hidden" onclick="showPage('manualapprovals')">
+            <span class="management-icon">⌁</span><div><b>Manuel Giriş Onayları</b><small>Kartını unutan personelin tarih ve saat girişlerini doğrulayın.</small></div><span>›</span>
+          </button>
+          <button id="managementPerformanceCard" class="management-card hidden" onclick="showPage('performance')">
+            <span class="management-icon">★</span><div><b>Performans Değerlendirmesi</b><small>Ekibiniz için gizli yönetici performans değerlendirmesi oluşturun.</small></div><span>›</span>
+          </button>
+          <button id="managementHrLeaveInfoCard" class="management-card hidden" onclick="showPage('hrleaveinfo')">
+            <span class="management-icon">✓</span><div><b>İzin Bilgi Akışı</b><small>Müdür kararlarını bilgi amaçlı takip edin; İK onayı gerekmez.</small></div><span>›</span>
+          </button>
+          <button id="managementHrManualCard" class="management-card hidden" onclick="showPage('hrmanual')">
+            <span class="management-icon">⌁</span><div><b>Manuel Giriş Kayıtları</b><small>Müdür tarafından doğrulanan manuel girişleri ve tüm kayıtları takip edin.</small></div><span>›</span>
+          </button>
           <button id="managementUsersCard" class="management-card" onclick="showPage('users')">
             <span class="management-icon">⚙</span><div><b>Kullanıcı Yönetimi</b><small>Personel hesabı ekleme ve erişim yönetimi.</small></div><span>›</span>
           </button>
-        </div>
-        <div class="management-announcement-box">
-          <div>
-            <h3>Kurumsal Bildirim Yayınla</h3>
-            <div class="muted">İK / yetkili kullanıcılar tarafından yayınlanan bildirimler tüm personelin sol panelinde görünür.</div>
-          </div>
-          <div class="announcement-form-grid">
-            <input id="announcementTitle" placeholder="Bildirim başlığı">
-            <input id="announcementExpiry" type="date" title="Opsiyonel bitiş tarihi">
-            <textarea id="announcementBody" rows="3" placeholder="Bildirim metni"></textarea>
-          </div>
-          <div class="form-actions"><button class="btn btn-primary" onclick="publishAnnouncement()">Bildirim Yayınla</button></div>
-          <div id="managementAnnouncementList" class="management-announcement-list"></div>
         </div>
       </div>
     </section>
@@ -1175,8 +1223,7 @@ window.MARS_CONFIG={
       <div id="approvalPendingSection">
         <div id="approvalAlert"></div>
         <div id="approvalPolicyInfo" class="card" style="margin-bottom:14px;font-size:13px;color:#53616d">
-          <b>Onay Akışı:</b> Yıllık Ücretli İzin, İdari İzin, İş Seyahati, Saatlik İzin ve Fuar kayıtları müdür onayına gelir.
-          Sağlık Raporu yalnızca kayıt/bildirim olarak tutulur ve onay beklemez.
+          <b>Tek Yetkili Onay:</b> İzin ve görev taleplerinde nihai karar bağlı müdür tarafından verilir. Müdür onayından sonra İnsan Kaynakları yalnızca bilgi alır. Sağlık Raporu yalnızca kayıt/bildirimdir.
         </div>
         <div id="approvalList"></div>
       </div>
@@ -1189,6 +1236,55 @@ window.MARS_CONFIG={
           </div>
         </div>
         <div id="approvedPeopleList" class="approved-person-grid"></div>
+      </div>
+    </section>
+
+
+    <section id="page-manualentry" class="hidden">
+      <div class="page-section-card">
+        <div class="page-section-head"><div><h2>Manuel Giriş</h2><div class="muted">Kartınızı unuttuğunuzda işyerinde bulunduğunuzu tarih ve saat ile bildirirsiniz. Kayıt bağlı müdürünüzün onayına gider.</div></div></div>
+        <div class="v237-status-note"><b>Kartımı unuttum:</b> Tarih ve saat seçin. Müdürünüz “Evet, personel buradaydı” şeklinde onayladığında kayıt kesinleşir ve İnsan Kaynakları ekranına bilgi olarak düşer.</div>
+        <div class="v237-form-grid">
+          <div><label>Gün</label><input id="manualEntryDate" type="date"></div>
+          <div><label>Saat</label><input id="manualEntryTime" type="time"></div>
+          <div><label>Açıklama</label><input id="manualEntryNote" placeholder="Örn. Kartımı evde unuttum"></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" onclick="submitManualEntry()">Manuel Girişi Müdüre Gönder</button></div>
+      </div>
+      <div class="section"><h2>Manuel Giriş Geçmişim</h2><div class="table-wrap"><table><thead><tr><th>Gün</th><th>Saat</th><th>Açıklama</th><th>Durum</th><th>Müdür Kararı</th></tr></thead><tbody id="manualEntryOwnBody"></tbody></table></div></div>
+    </section>
+
+    <section id="page-manualapprovals" class="hidden">
+      <div class="page-section-card">
+        <div class="page-section-head"><div><h2>Manuel Giriş Onayları</h2><div class="muted">Kartını unutan bağlı personelin işyerinde bulunduğunu doğrulayın.</div></div></div>
+        <div class="hr-info-banner"><b>Onay verdiğinizde:</b> kayıt kesinleşir ve İnsan Kaynakları ekranına otomatik olarak bilgi düşer.</div>
+        <div id="manualApprovalList" class="v237-list"></div>
+      </div>
+      <div class="section"><h2>Sonuçlanan Manuel Girişler</h2><div class="table-wrap"><table><thead><tr><th>Personel</th><th>Gün</th><th>Saat</th><th>Durum</th><th>Karar Tarihi</th></tr></thead><tbody id="manualApprovedBody"></tbody></table></div></div>
+    </section>
+
+    <section id="page-hrleaveinfo" class="hidden">
+      <div class="page-section-card">
+        <div class="page-section-head"><div><h2>İK İzin Bilgi Akışı</h2><div class="muted">İzin onayı müdür tarafından verilir. Bu ekran İnsan Kaynakları için yalnızca kayıt ve takip amaçlıdır.</div></div></div>
+        <div class="hr-info-banner"><b>İK onay mercii değildir.</b> Müdürün onayladığı izinler burada otomatik görünür. Sağlık raporları da bilgi kaydı olarak listelenir.</div>
+        <div class="table-wrap"><table><thead><tr><th>Personel</th><th>Tür</th><th>Tarih</th><th>Süre</th><th>Durum</th><th>Müdür Kararı</th></tr></thead><tbody id="hrLeaveInfoBody"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="page-hrmanual" class="hidden">
+      <div class="page-section-card">
+        <div class="page-section-head"><div><h2>İK Manuel Giriş Kayıtları</h2><div class="muted">Tüm personelin manuel giriş kayıtları ve müdür doğrulamaları.</div></div></div>
+        <div class="hr-info-banner">İnsan Kaynakları bu ekranda kayıtları takip eder; manuel giriş onayı bağlı müdür tarafından verilir.</div>
+        <div class="table-wrap"><table><thead><tr><th>Personel</th><th>Departman</th><th>Gün</th><th>Saat</th><th>Açıklama</th><th>Durum</th><th>Müdür Kararı</th></tr></thead><tbody id="hrManualBody"></tbody></table></div>
+      </div>
+    </section>
+
+    <section id="page-performance" class="hidden">
+      <div class="page-section-card">
+        <div class="page-section-head"><div><h2>Performans Değerlendirmesi</h2><div class="muted">Değerlendirmeler personelden gizlidir. Yalnız değerlendirmeyi yapan müdür ve Genel Müdür görüntüleyebilir.</div></div><span class="privacy-chip">🔒 Personelden Gizli</span></div>
+        <div id="performanceTargetWrap"><h3>Ekibimi Değerlendir</h3><div id="performanceTargets" class="performance-target-grid"></div></div>
+        <div class="section-heading-row"><div><h3 style="margin:0">Performans Kayıtları</h3><div id="performanceListSubtitle" class="muted" style="margin-top:4px"></div></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Personel</th><th>Dönem</th><th>Puan</th><th>Değerlendiren</th><th>Değerlendirme</th><th>Güncelleme</th></tr></thead><tbody id="performanceBody"></tbody></table></div>
       </div>
     </section>
 
@@ -1366,7 +1462,7 @@ window.MARS_CONFIG={
 
 
 <script>
-let sessionToken=null, currentUser=null, requests=[], users=[], dashboardTeamUsers=[], hrAnnouncements=[];
+let sessionToken=null, currentUser=null, requests=[], users=[], dashboardTeamUsers=[], hrAnnouncements=[], manualEntries=[], performanceReviews=[];
 let myLeaveTypeFilter="all";
 let pollTimer=null, lastPendingCount=0;
 let personalUnreadNotifications=[];
@@ -1400,9 +1496,15 @@ function el(id){return document.getElementById(id)}
 function isManager(){return currentUser?.role==="manager"}
 function isGeneralManager(){return currentUser?.role==="general_manager"}
 function isLeader(){return isManager()||isGeneralManager()}
+function isHr(){
+  const dept=String(currentUser?.department||"").toLocaleLowerCase("tr-TR").trim();
+  const username=String(currentUser?.username||"").toLocaleLowerCase("tr-TR").trim();
+  return currentUser?.role==="hr" || username==="ik" || dept==="ik" || dept==="i̇k" || dept.includes("insan kaynak");
+}
 function roleLabel(role){
   if(role==="general_manager")return "Genel Müdür";
   if(role==="manager")return "Yurt Dışı Satış Müdürü";
+  if(role==="hr")return "İnsan Kaynakları";
   return "Personel";
 }
 function escapeHtml(value){
@@ -1414,12 +1516,9 @@ function requestYear(r){
   return m?m[1]:"";
 }
 function isTaskRecord(r){return ["İş Seyahati","Fuar"].includes(r.type)}
-function canPublishAnnouncement(){
-  const dept=String(currentUser?.department||"").toLocaleLowerCase("tr-TR");
-  return isLeader() || dept.includes("insan kaynak") || dept==="ik" || dept.includes("i̇k");
-}
+function canPublishAnnouncement(){return isHr()}
 function ownDirectRecordStatus(r){
-  return r.status==="Onaylandı" || (isGeneralManager() && r.user===currentUser.username && r.status==="Bildirildi");
+  return r.status==="Onaylandı" || r.status==="Bildirildi";
 }
 function showSync(text,isError=false){
   const x=el("syncStatus"); if(!x)return;
@@ -1494,6 +1593,8 @@ function saveNotificationState(){
 function requestDecisionSignature(r){
   return [
     r.status||"",
+    r.managerDecisionAt||"",
+    r.hrDecisionAt||"",
     r.decisionAt||"",
     r.approvalRevokedAt||"",
     r.withdrawnAt||""
@@ -1501,13 +1602,13 @@ function requestDecisionSignature(r){
 }
 function decisionNotificationInfo(r){
   if(r.status==="Onaylandı"){
-    return {icon:"✓",cls:"approved",title:"Talebiniz onaylandı",body:`${r.type} • ${dateText(r)}`};
+    return {icon:"✓",cls:"approved",title:"Talebiniz müdürünüz tarafından onaylandı",body:`${r.type} • ${dateText(r)}`};
   }
   if(r.status==="Reddedildi"){
     return {icon:"×",cls:"rejected",title:"Talebiniz reddedildi",body:`${r.type} • ${dateText(r)}`};
   }
   if(r.status==="Onay Geri Çekildi"){
-    return {icon:"↩",cls:"revoked",title:"Onay geri çekildi",body:`${r.type} • ${dateText(r)}`};
+    return {icon:"↩",cls:"revoked",title:"Müdür onayı geri çekildi",body:`${r.type} • ${dateText(r)}`};
   }
   return null;
 }
@@ -1695,7 +1796,7 @@ function processPersonalDecisionNotifications(){
             body:info.body,
             cls:info.cls,
             icon:info.icon,
-            time:r.decisionAt||r.approvalRevokedAt||new Date().toISOString()
+            time:r.hrDecisionAt||r.managerDecisionAt||r.decisionAt||r.approvalRevokedAt||new Date().toISOString()
           };
           personalUnreadNotifications.unshift(item);
           personalUnreadNotifications=personalUnreadNotifications.slice(0,30);
@@ -1716,7 +1817,7 @@ function processPersonalDecisionNotifications(){
   saveNotificationState();
 }
 function pendingActionCount(){
-  return isLeader()?pendingManagerRequests().length:0;
+  return isLeader()?(pendingManagerRequests().length+pendingManualApprovalRequests().length):0;
 }
 function totalNotificationCount(){
   return pendingActionCount()+personalUnreadNotifications.length;
@@ -1776,12 +1877,12 @@ function renderNotificationPanel(){
   const parts=[];
 
   if(pending>0){
-    const who=isGeneralManager()?"Kahtan Yunus":"Ekibiniz";
+    const who=isGeneralManager()?"Bağlı yöneticiler / ekip":"Ekibiniz";
     parts.push(`<div class="notification-item" onclick="openPendingNotifications(event)">
       <div class="notification-item-icon pending">!</div>
       <div class="notification-item-main">
-        <div class="notification-item-title">${pending} onay bekleyen talep</div>
-        <div class="notification-item-text">${who} tarafından gönderilen izin talepleri işlem bekliyor.</div>
+        <div class="notification-item-title">${pending} yönetici işlemi bekliyor</div>
+        <div class="notification-item-text">${who} için izin veya manuel giriş kaydı onayınızı bekliyor.</div>
       </div>
       <div class="notification-unread-dot"></div>
     </div>`);
@@ -1816,7 +1917,7 @@ function closeNotificationPanel(){
 function openPendingNotifications(event){
   if(event)event.stopPropagation();
   closeNotificationPanel();
-  showPage("approvals");
+  showPage("management");
 }
 function openPersonalNotification(key,event){
   if(event)event.stopPropagation();
@@ -1877,30 +1978,51 @@ async function login(){
     el("loginScreen").classList.add("hidden");
     el("app").classList.remove("hidden");
     el("sideName").textContent=currentUser.name;
-    el("sideRole").textContent=isGeneralManager()?"Genel Müdür":(isManager()?(currentUser.department||"Yurt Dışı Satış Müdürü"):currentUser.department);
+    el("sideRole").textContent=isHr()?"İnsan Kaynakları":(isGeneralManager()?"Genel Müdür":(isManager()?(currentUser.department||"Yurt Dışı Satış Müdürü"):currentUser.department));
     const _parts=String(currentUser.name||"").trim().split(/\s+/).filter(Boolean);
     el("topUserInitials").textContent=(_parts.slice(0,2).map(x=>x[0]).join("")||"ME").toUpperCase();
     el("topUserName").textContent=currentUser.name||"MARS ELEVATOR";
-    el("topUserRole").textContent=isGeneralManager()?"Genel Müdür":(isManager()?"Yurt Dışı Satış Müdürü":(currentUser.department||"Personel"));
+    el("topUserRole").textContent=isHr()?"İnsan Kaynakları":(isGeneralManager()?"Genel Müdür":(isManager()?"Yurt Dışı Satış Müdürü":(currentUser.department||"Personel")));
     el("welcome").textContent="Hoş geldiniz, "+currentUser.name;
 
-    el("teamNav").classList.toggle("hidden",!isLeader());
-    el("reportsNav").classList.toggle("hidden",!isLeader());
-    el("managementNav").classList.toggle("hidden",!isLeader());
-    el("calendarScopeTabs").classList.toggle("hidden",!isLeader());
+    el("teamNav").classList.toggle("hidden",!(isLeader()||isHr()));
+    el("reportsNav").classList.toggle("hidden",!(isLeader()||isHr()));
+    el("managementNav").classList.toggle("hidden",!(isLeader()||isHr()));
+    if(el("hrAnnouncementsNav"))el("hrAnnouncementsNav").classList.toggle("hidden",!isHr());
+    if(el("manualEntryNav"))el("manualEntryNav").classList.toggle("hidden",isHr());
+    if(el("performanceNav"))el("performanceNav").classList.toggle("hidden",!isLeader());
+    if(el("hrLeaveInfoNav"))el("hrLeaveInfoNav").classList.toggle("hidden",!isHr());
+    if(el("hrManualNav"))el("hrManualNav").classList.toggle("hidden",!isHr());
+    el("calendarScopeTabs").classList.toggle("hidden",!(isLeader()||isHr()));
     if(el("managementUsersCard"))el("managementUsersCard").classList.toggle("hidden",!isManager());
+    if(el("managementApprovalCard"))el("managementApprovalCard").classList.toggle("hidden",!isLeader());
+    if(el("managementManualCard"))el("managementManualCard").classList.toggle("hidden",!isLeader());
+    if(el("managementPerformanceCard"))el("managementPerformanceCard").classList.toggle("hidden",!isLeader());
+    if(el("managementHrLeaveInfoCard"))el("managementHrLeaveInfoCard").classList.toggle("hidden",!isHr());
+    if(el("managementHrManualCard"))el("managementHrManualCard").classList.toggle("hidden",!isHr());
 
-    if(isGeneralManager()){
-      el("requestNav").textContent="＋ İzin Kaydı";
-      el("newRequestTopBtn").textContent="+ Yeni İzin Kaydı";
-      el("requestHeading").textContent="Yeni İzin Kaydı";
-      el("requestSubmitBtn").textContent="İzin Kaydet";
-      if(el("myRequestsTitle")) el("myRequestsTitle").textContent="Son İzin Kayıtlarım";
+    if(isHr()){
+      el("requestNav").classList.add("hidden");
+      if(el("myLeavesNav"))el("myLeavesNav").classList.add("hidden");
+      if(el("newRequestTopBtn"))el("newRequestTopBtn").classList.add("hidden");
+      el("teamNavText").textContent="Tüm Personel";
+      el("teamHeading").textContent="Tüm Personel";
+      el("teamSubtitle").textContent="Tüm personelin izin, görev ve mevcut durum kayıtları";
+      el("tabPending").innerHTML='Onay Bekleyenler <span id="pendingTabBadge" class="notification-badge hidden">0</span>';
+      el("tabApproved").textContent="Sonuçlananlar";
+      el("tabApproved").classList.remove("hidden");
+      el("approvalPolicyInfo").innerHTML="<b>İK bilgi rolü:</b> İzin ve görev kararını müdür verir. İK yalnızca sonuçlanan kayıtları bilgi amaçlı izler.";
+    }else if(isGeneralManager()){
+      el("requestNav").textContent="＋ İzin Talebi";
+      el("newRequestTopBtn").textContent="+ Yeni İzin Talebi";
+      el("requestHeading").textContent="Yeni İzin Talebi";
+      el("requestSubmitBtn").textContent="Talebi Gönder";
+      if(el("myRequestsTitle")) el("myRequestsTitle").textContent="Son İzin Taleplerim";
       el("teamNavText").textContent="Personel İzinleri";
       el("teamHeading").textContent="Personel İzinleri";
       el("teamSubtitle").textContent="Personellerin izin ve görev kayıtlarını görüntüleyebilirsiniz.";
-      el("tabApproved").classList.add("hidden");
-      el("approvalPolicyInfo").innerHTML="<b>Genel Müdür Onayı:</b> Bu ekranda yalnızca Kahtan Yunus tarafından gönderilen onay bekleyen talepler görünür. Personel talepleri Kahtan Yunus tarafından onaylanmaya devam eder.";
+      el("tabApproved").classList.remove("hidden");
+      el("approvalPolicyInfo").innerHTML="<b>Onay Akışı:</b> Bağlı personelin izin / görev kararını siz verirsiniz. Onaylanan kayıtlar İnsan Kaynaklarına bilgi olarak iletilir.";
     }else{
       el("requestNav").textContent="＋ İzin Talebi";
       el("newRequestTopBtn").textContent="+ Yeni İzin Talebi";
@@ -1911,14 +2033,15 @@ async function login(){
       el("teamHeading").textContent="Ekibim";
       el("teamSubtitle").textContent="İzinler ve görev kayıtları için ekip özeti";
       el("tabApproved").classList.remove("hidden");
-      el("approvalPolicyInfo").innerHTML="<b>Onay Akışı:</b> Yıllık Ücretli İzin, İdari İzin, İş Seyahati, Saatlik İzin ve Fuar kayıtları müdür onayına gelir. Sağlık Raporu yalnızca kayıt/bildirim olarak tutulur ve onay beklemez.";
+      el("approvalPolicyInfo").innerHTML="<b>Müdür Onayı:</b> Bağlı personelin izin / görev kararını müdür verir. Onay sonrası İnsan Kaynaklarına otomatik bilgi iletilir. Sağlık Raporu yalnızca kayıt/bildirimdir.";
     }
 
     updateLeavePolicyInfo();
+    setManualEntryDefaults();
     await refreshAll(true);
     // Login kullanıcı etkileşimiyle tetiklendiği için izin istemeyi burada dener.
     ensureDesktopNotificationPermission();
-    showPage("dashboard");
+    showPage(isHr()?"management":"dashboard");
     clearInterval(pollTimer);
     pollTimer=setInterval(()=>refreshAll(false),7000);
   }catch(e){
@@ -1935,7 +2058,7 @@ async function refreshAll(showMessage=false){
   try{
     if(showMessage)showSync("Senkronize ediliyor...");
     requests=await rpc("mars_list_requests",{p_token:sessionToken}) || [];
-    if(isLeader()){
+    if(isLeader()||isHr()){
       users=await rpc("mars_list_users",{p_token:sessionToken}) || [];
     }else{
       users=[{username:currentUser.username,name:currentUser.name,role:currentUser.role,department:currentUser.department,annualEntitlement:Number(currentUser.annualEntitlement)}];
@@ -1952,6 +2075,16 @@ async function refreshAll(showMessage=false){
       console.warn("Announcement RPC not installed yet",announcementErr);
       hrAnnouncements=[];
     }
+    try{
+      manualEntries=await rpc("mars_list_manual_entries",{p_token:sessionToken}) || [];
+    }catch(manualErr){
+      console.warn("Manual entry RPC not installed yet",manualErr);
+      manualEntries=[];
+    }
+    if(isLeader()){
+      try{performanceReviews=await rpc("mars_list_performance_reviews",{p_token:sessionToken}) || []}
+      catch(perfErr){console.warn("Performance RPC not installed yet",perfErr);performanceReviews=[]}
+    }else performanceReviews=[];
     renderDashboard();
     renderApprovals();
     renderTeam();
@@ -1961,6 +2094,11 @@ async function refreshAll(showMessage=false){
     renderReports();
     renderSidebarAnnouncements();
     renderManagementAnnouncements();
+    renderManualEntryOwn();
+    renderManualApprovals();
+    renderHrManualEntries();
+    renderHrLeaveInfo();
+    renderPerformance();
     processPersonalDecisionNotifications();
     updateApprovalNotifications(true);
     updateAppBadge();
@@ -1971,22 +2109,33 @@ async function refreshAll(showMessage=false){
   }
 }
 function showPage(page){
-  const leaderOnly=["team","reports","management","approvals","users"];
-  if(leaderOnly.includes(page) && !isLeader())page="dashboard";
+  const elevatedOnly=["team","reports","management","approvals"];
+  if(elevatedOnly.includes(page) && !(isLeader()||isHr()))page="dashboard";
+  if(page==="announcementsadmin" && !isHr())page="dashboard";
   if(page==="users" && !isManager())page="management";
-  ["dashboard","request","calendar","myleaves","reports","management","approvals","team","users"].forEach(p=>{
+  if(page==="manualentry" && isHr())page="dashboard";
+  if(page==="manualapprovals" && !isLeader())page="management";
+  if(page==="performance" && !isLeader())page="dashboard";
+  if((page==="hrmanual"||page==="hrleaveinfo") && !isHr())page="management";
+  ["dashboard","request","calendar","myleaves","manualentry","performance","hrleaveinfo","hrmanual","manualapprovals","announcementsadmin","reports","management","approvals","team","users"].forEach(p=>{
     const sec=el("page-"+p); if(sec)sec.classList.toggle("hidden",p!==page);
     const nav=document.querySelector(`[data-page="${p}"]`); if(nav)nav.classList.toggle("active",p===page);
   });
   const titles={
     dashboard:"İzin Yönetim Sistemi",
-    request:isGeneralManager()?"İzin Kaydı":"İzin Talebi",
+    request:"İzin Talebi",
     calendar:"Takvim",
     myleaves:"İzinlerim",
+    manualentry:"Manuel Giriş",
+    manualapprovals:"Manuel Giriş Onayları",
+    performance:"Performans Değerlendirmesi",
+    hrleaveinfo:"İK İzin Bilgi Akışı",
+    hrmanual:"İK Manuel Giriş Kayıtları",
+    announcementsadmin:"İK Bildirim Yönetimi",
     reports:"Raporlar",
-    management:"Yönetim",
-    approvals:isGeneralManager()?"Kahtan Onayları":"Müdür Onayları",
-    team:isGeneralManager()?"Personel İzinleri":"Ekibim",
+    management:isHr()?"İnsan Kaynakları Merkezi":"Yönetim",
+    approvals:isGeneralManager()?"Yönetici Onayları":"Müdür Onayları",
+    team:isHr()?"Tüm Personel":(isGeneralManager()?"Personel İzinleri":"Ekibim"),
     users:"Kullanıcı Yönetimi"
   };
   el("pageTitle").textContent=titles[page]||"";
@@ -1994,10 +2143,15 @@ function showPage(page){
   if(page==="calendar")renderCalendar();
   if(page==="myleaves")renderMyLeaves();
   if(page==="reports")renderReports();
-  if(page==="management")renderManagementAnnouncements();
-  if(page==="approvals")showApprovalSection(isGeneralManager()?"pending":currentApprovalSection);
+  if(page==="announcementsadmin")renderManagementAnnouncements();
+  if(page==="approvals")showApprovalSection(currentApprovalSection);
   if(page==="team")renderTeam();
   if(page==="users")renderUsers();
+  if(page==="manualentry"){setManualEntryDefaults();renderManualEntryOwn()}
+  if(page==="manualapprovals")renderManualApprovals();
+  if(page==="hrmanual")renderHrManualEntries();
+  if(page==="hrleaveinfo")renderHrLeaveInfo();
+  if(page==="performance")renderPerformance();
 }
 function myReqs(){return requests.filter(r=>r.user===currentUser.username)}
 function isRecorded(r){
@@ -2027,7 +2181,7 @@ function dateText(r){
 }
 function durationText(r){return r.type==="Saatlik İzin"?formatHours(r.durationHours):formatWorkDays(r.durationDays)}
 function statusBadge(s){
-  let cls=(s==="Onaylandı"||s==="Bildirildi")?"ok":(s==="Bekliyor"||s==="Onay Geri Çekildi")?"wait":"bad";
+  let cls=(s==="Onaylandı"||s==="Bildirildi")?"ok":(["Bekliyor","İK Onayında","Onay Geri Çekildi"].includes(s)?"wait":"bad");
   return `<span class="badge ${cls}">${s}</span>`;
 }
 function canWithdraw(r){
@@ -2210,7 +2364,7 @@ function reportPersonRows(){
   });
 }
 function renderReports(){
-  if(!isLeader())return;
+  if(!(isLeader()||isHr()))return;
   const rows=reportPersonRows();
   if(el("reportPeople"))el("reportPeople").textContent=rows.length+" Kişi";
   const team=dashboardTeamUsers||[];
@@ -2247,7 +2401,7 @@ function openAllAnnouncements(event){
 }
 function renderManagementAnnouncements(){
   const host=el("managementAnnouncementList");if(!host)return;
-  if(!isLeader()){host.innerHTML="";return}
+  if(!isHr()){host.innerHTML="";return}
   const list=hrAnnouncements||[];
   host.innerHTML=list.length?list.map(a=>`<div class="management-announcement-row"><div><b>${escapeHtml(a.title)}</b><p>${escapeHtml(a.body)}</p><small>${announcementTimeText(a.publishedAt)}</small></div><button onclick="archiveAnnouncement('${a.id}')">Kaldır</button></div>`).join(""):'<div class="muted" style="margin-top:10px">Aktif kurumsal bildirim bulunmuyor.</div>';
 }
@@ -2274,13 +2428,16 @@ function handleTopSearch(event){
   if(!q)return;
   if(q.includes("takvim"))showPage("calendar");
   else if(q.includes("izinlerim")||q.includes("geçmiş")||q.includes("gecmis"))showPage("myleaves");
-  else if((q.includes("rapor"))&&isLeader())showPage("reports");
-  else if((q.includes("yönetim")||q.includes("yonetim")||q.includes("onay"))&&isLeader())showPage("management");
+  else if(q.includes("manuel")||q.includes("kart"))showPage(isHr()?"hrmanual":"manualentry");
+  else if(q.includes("performans")&&isLeader())showPage("performance");
+  else if((q.includes("bildirim")||q.includes("duyuru"))&&isHr())showPage("announcementsadmin");
+  else if(q.includes("rapor")&&(isLeader()||isHr()))showPage("reports");
+  else if((q.includes("yönetim")||q.includes("yonetim")||q.includes("onay"))&&(isLeader()||isHr()))showPage("management");
   else if(q.includes("izin")||q.includes("talep")||q.includes("görev")||q.includes("fuar"))showPage("request");
-  else if((q.includes("ekip")||q.includes("personel"))&&isLeader())showPage("team");
-  else alert("Arama için: izin, izinlerim, takvim, ekip, rapor veya yönetim yazabilirsiniz.");
+  else if((q.includes("ekip")||q.includes("personel"))&&(isLeader()||isHr()))showPage("team");
+  else alert("Arama için: izin, izinlerim, takvim, manuel giriş, performans, ekip, rapor veya yönetim yazabilirsiniz.");
 }
-function showHelpInfo(){alert("MARS ELEVATOR İzin Yönetim Sistemi\\n\\n• İzin Talebi: izin / görev kaydı oluşturur.\\n• Takvim: izin ve resmi tatilleri gösterir.\\n• İzinlerim: tüm izin geçmişinizi listeler.\\n• Sol Bildirimler: İK duyurularını gösterir.\\n• Zil: kişisel sistem bildirimlerinizi gösterir.");}
+function showHelpInfo(){alert("MARS ELEVATOR Personel Yönetim Sistemi\n\n• İzin Talebi: izin / görev kaydı oluşturur; bağlı müdür onaylar.\n• İzinlerim: tüm izin geçmişinizi listeler.\n• Manuel Giriş: kart unutulduğunda gün / saat bildirimi gönderir.\n• Performans: yalnız müdür ve genel müdür tarafından görülen gizli değerlendirmedir.\n• İK: onay vermez; sonuçlanan kayıtları bilgi amaçlı takip eder ve kurumsal bildirim yayınlar.");}
 async function withdrawRequest(id){
   if(!confirm("Bu talebi geri çekmek istediğinize emin misiniz?"))return;
   try{await rpc("mars_withdraw_request",{p_token:sessionToken,p_request_id:id});await refreshAll()}catch(e){alert(e.message)}
@@ -2291,25 +2448,21 @@ function toggleLeaveFields(){
   ["singleDateWrap","startTimeWrap","endTimeWrap"].forEach(id=>el(id).classList.toggle("hidden",!hourly));
 }
 function updateLeavePolicyInfo(){
-  const box=el("leavePolicyInfo"); if(!box)return;
+  const box=el("leavePolicyInfo"); if(!box||!currentUser)return;
   const t=el("leaveType").value;
-
-  if(isGeneralManager()){
-    if(t==="Yıllık Ücretli İzin")box.innerHTML="<b>Kendi izin kaydınız doğrudan sisteme işlenir.</b> Yıllık izin bakiyenizden düşer. Cumartesi, Pazar ve tam gün resmi tatiller düşülmez.";
-    else if(t==="Sağlık Raporu")box.innerHTML="<b>Kayıt olarak sisteme işlenir.</b> Yıllık izin bakiyesinden düşmez.";
-    else if(t==="Saatlik İzin")box.innerHTML="<b>Kayıt olarak sisteme işlenir.</b> Saat bazında takip edilir ve yıllık izin bakiyesinden düşmez.";
-    else if(t==="Fuar")box.innerHTML="<b>Fuar izin değildir.</b> Görev kaydı olarak sisteme doğrudan işlenir.";
-    else if(t==="İş Seyahati")box.innerHTML="<b>İş Seyahati izin değildir.</b> Görev kaydı olarak sisteme doğrudan işlenir.";
-    else box.innerHTML="<b>Kendi izin kaydınız doğrudan sisteme işlenir.</b> Yıllık izin bakiyesinden düşmez.";
+  if(isHr()){
+    box.innerHTML="<b>İK operasyon hesabı izin talebi oluşturmaz.</b> Bu hesap personel kayıt takibi, manuel giriş takibi, raporlama ve kurumsal bildirim içindir.";
     return;
   }
-
-  const approvalText=isManager()?"Genel Müdür onayı gereklidir.":"Müdür onayı gereklidir.";
+  if(t==="Sağlık Raporu"){
+    box.innerHTML="<b>Yıllık izin bakiyesinden düşmez.</b> Sağlık Raporu onaysız kayıt/bildirim olarak sisteme işlenir.";
+    return;
+  }
+  const approvalText="Talebiniz bağlı onay merciine gider. Onay sonrası İnsan Kaynaklarına bilgi verilir.";
   if(t==="Yıllık Ücretli İzin")box.innerHTML=`<b>Yıllık izin bakiyesinden düşer.</b> ${approvalText} Cumartesi, Pazar ve tam gün resmi tatiller düşülmez.`;
-  else if(t==="Sağlık Raporu")box.innerHTML="<b>Yıllık izin bakiyesinden düşmez.</b> Sadece kayıt/bildirim olarak sisteme işlenir.";
-  else if(t==="Saatlik İzin")box.innerHTML=`<b>Yıllık izinden gün olarak düşmez.</b> Saat bazında takip edilir ve ${approvalText.toLowerCase()}`;
-  else if(t==="Fuar")box.innerHTML=`<b>Fuar bir izin türü değildir.</b> Görev kaydı olarak tutulur ve ${approvalText.toLowerCase()}`;
-  else if(t==="İş Seyahati")box.innerHTML=`<b>İş Seyahati bir izin türü değildir.</b> Görev kaydı olarak tutulur ve ${approvalText.toLowerCase()}`;
+  else if(t==="Saatlik İzin")box.innerHTML=`<b>Yıllık izinden gün olarak düşmez.</b> Saat bazında takip edilir. ${approvalText}`;
+  else if(t==="Fuar")box.innerHTML=`<b>Fuar izin değildir; görev kaydıdır.</b> ${approvalText}`;
+  else if(t==="İş Seyahati")box.innerHTML=`<b>İş Seyahati izin değildir; görev kaydıdır.</b> ${approvalText}`;
   else box.innerHTML=`<b>Yıllık izin bakiyesinden düşmez.</b> ${approvalText}`;
 }
 async function submitLeave(){
@@ -2323,9 +2476,11 @@ async function submitLeave(){
     }
     const d=await rpc("mars_create_request",args);
     if(d.status==="Bekliyor"){
-      alert(isManager()?"Talep Genel Müdür onayına gönderildi.":"Talep müdür onayına gönderildi.");
+      alert("Talep bağlı müdürünüzün onayına gönderildi.");
+    }else if(d.status==="Onaylandı"){
+      alert("Kayıt sisteme işlendi ve İnsan Kaynaklarına bilgi iletildi.");
     }else{
-      alert(isGeneralManager()?"İzin kaydı sisteme işlendi.":"Kayıt sisteme işlendi.");
+      alert("Kayıt sisteme işlendi.");
     }
     ["leaveNote","startDate","endDate","singleDate"].forEach(id=>el(id).value="");
     await refreshAll();showPage("dashboard");
@@ -2362,17 +2517,17 @@ function goCalendarToday(){const d=new Date();calendarYear=Math.max(2022,Math.mi
 function setCalendarScope(scope){calendarScope=scope;calendarFocusUser=null;calendarFocusType=null;renderCalendar()}
 function configureCalendarScopeUI(){
   const tabs=el("calendarScopeTabs"),sub=el("calendarScopeSubtitle");
-  if(isLeader()){
+  if(isLeader()||isHr()){
     tabs.classList.remove("hidden");el("scopeOwnBtn").classList.toggle("active",calendarScope==="own");el("scopeTeamBtn").classList.toggle("active",calendarScope==="team");
     sub.textContent=calendarScope==="own"
       ?`${currentUser.name} — kendi izinleri ve Türkiye resmi tatilleri`
-      :(isGeneralManager()?"Tüm personel izinleri ve Türkiye resmi tatilleri":"Yurtdışı Satış ekibi izinleri ve Türkiye resmi tatilleri");
+      :(isHr()?"Tüm personel izinleri ve Türkiye resmi tatilleri":(isGeneralManager()?"Tüm personel izinleri ve Türkiye resmi tatilleri":"Yurtdışı Satış ekibi izinleri ve Türkiye resmi tatilleri"));
   }else{tabs.classList.add("hidden");calendarScope="own";sub.textContent=`${currentUser.name} — kendi izinleri ve Türkiye resmi tatilleri`}
 }
 function coversDate(r,iso){return r.type==="Saatlik İzin"?r.date===iso:(r.start&&r.end&&r.start<=iso&&r.end>=iso)}
 function calendarVisibleRequests(iso){
   let list=requests.filter(r=>!["Reddedildi","Geri Çekildi","Onay Geri Çekildi"].includes(r.status)&&coversDate(r,iso));
-  if(!isLeader()||calendarScope==="own")list=list.filter(r=>r.user===currentUser.username);
+  if(!(isLeader()||isHr())||calendarScope==="own")list=list.filter(r=>r.user===currentUser.username);
   else list=list.filter(r=>r.user!==currentUser.username);
   if(calendarFocusUser)list=list.filter(r=>r.user===calendarFocusUser && (calendarFocusType!=="annual"||r.type==="Yıllık Ücretli İzin") && (calendarFocusType!=="hourly"||r.type==="Saatlik İzin"));
   return list;
@@ -2412,26 +2567,33 @@ function renderCalendar(){
   renderHolidayList();
 }
 
-/* ---------------- Manager approvals ---------------- */
+/* ---------------- V23.7: Manager final approval, HR information only ---------------- */
 function pendingManagerRequests(){
-  return isLeader()?requests.filter(r=>r.manager===currentUser.username&&r.status==="Bekliyor"):[];
+  if(!isLeader())return [];
+  return requests.filter(r=>r.manager===currentUser.username&&r.status==="Bekliyor");
 }
 function managerApprovedRequests(){
-  return isManager()?requests.filter(r=>r.manager===currentUser.username&&r.status==="Onaylandı"):[];
+  if(!isLeader())return [];
+  return requests.filter(r=>r.manager===currentUser.username&&r.managerDecisionAt&&["Onaylandı","Reddedildi","Onay Geri Çekildi"].includes(r.status));
+}
+function pendingManualApprovalRequests(){
+  if(!isLeader())return [];
+  return manualEntries.filter(r=>r.manager===currentUser.username&&r.status==="Müdür Onayı Bekliyor");
 }
 function updateApprovalNotifications(showToast=false){
   if(!isLeader())return;
-  const n=pendingManagerRequests().length;
+  const leaveN=pendingManagerRequests().length;
+  const manualN=pendingManualApprovalRequests().length;
+  const n=leaveN+manualN;
   ["approvalBadge","pendingTabBadge"].forEach(id=>{const x=el(id);if(x){x.textContent=n;x.classList.toggle("hidden",n===0)}});
   if(showToast&&n>lastPendingCount&&n>0){
-    const who=isGeneralManager()?"Kahtan Yunus":"Ekibiniz";
-    showInAppToast("🔔 Yeni Onay Bekliyor",`Onayınızı bekleyen <b>${n}</b> izin talebi bulunuyor.`);
-    showDesktopNotification("MARS ELEVATOR • Onay Bekliyor",`${who}: ${n} izin talebi onayınızı bekliyor.`);
+    const parts=[];if(leaveN)parts.push(`${leaveN} izin/görev`);if(manualN)parts.push(`${manualN} manuel giriş`);
+    showInAppToast("🔔 Yönetici Onayı Bekliyor",`${parts.join(" + ")} kaydı işlem bekliyor.`);
+    showDesktopNotification("MARS ELEVATOR • Yönetici Onayı",`${n} kayıt işlem bekliyor.`);
   }
   lastPendingCount=n;
 }
 function showApprovalSection(section){
-  if(isGeneralManager())section="pending";
   currentApprovalSection=section;
   el("approvalPendingSection").classList.toggle("hidden",section!=="pending");
   el("approvalApprovedSection").classList.toggle("hidden",section!=="approved");
@@ -2440,34 +2602,49 @@ function showApprovalSection(section){
   if(section==="pending")renderApprovals();else renderApprovedPeople();
 }
 function renderApprovalAlert(n){
-  const detail=isGeneralManager()?"Kahtan Yunus tarafından gönderilen talepler aşağıda listelenir.":"Aşağıdaki talepleri inceleyebilirsiniz.";
-  el("approvalAlert").innerHTML=n?`<div class="approval-alert"><div><div class="approval-alert-title"><span class="notification-dot"></span>${n} izin talebi onayınızı bekliyor</div><div class="approval-alert-text">${detail}</div></div><div class="notification-badge">${n}</div></div>`:`<div class="card" style="margin-bottom:14px;color:#2e7d32"><b>✓ Bekleyen izin talebi bulunmuyor.</b></div>`;
+  const detail="İzin / görev kararını siz verirsiniz. Onaylanan kayıt İnsan Kaynaklarına otomatik olarak bilgi şeklinde iletilir.";
+  el("approvalAlert").innerHTML=n?`<div class="approval-alert"><div><div class="approval-alert-title"><span class="notification-dot"></span>${n} izin / görev talebi onayınızı bekliyor</div><div class="approval-alert-text">${detail}</div></div><div class="notification-badge">${n}</div></div>`:`<div class="card" style="margin-bottom:14px;color:#2e7d32"><b>✓ Bekleyen izin / görev talebi bulunmuyor.</b></div>`;
 }
 function renderApprovals(){
   if(!isLeader())return;
   const p=pendingManagerRequests();renderApprovalAlert(p.length);
-  el("approvalList").innerHTML=p.map(r=>{
-    const actions=isGeneralManager()
-      ?`<button class="btn btn-ok" onclick="decide('${r.id}','Onaylandı')">Onayla</button>`
-      :`<button class="btn btn-danger" onclick="decide('${r.id}','Reddedildi')">Reddet</button><button class="btn btn-ok" onclick="decide('${r.id}','Onaylandı')">Onayla</button>`;
-    return `<div class="approval-card pending-attention"><div><div style="font-weight:900">${r.name}</div><div>${r.type} • <b>${durationText(r)}</b></div><div class="approval-meta">${dateText(r)}${r.note?" • Sebep: "+r.note:""}</div></div><div class="approval-actions">${actions}</div></div>`;
-  }).join("");
+  el("approvalPolicyInfo").innerHTML="<b>Müdür Nihai Onayı:</b> Onay verdiğiniz anda izin / görev kesinleşir. İnsan Kaynakları kararı değiştirmez; yalnızca bilgi ve kayıt amacıyla görür.";
+  el("approvalList").innerHTML=p.map(r=>`<div class="approval-card pending-attention"><div><div style="font-weight:900">${escapeHtml(r.name)}</div><div>${escapeHtml(r.type)} • <b>${durationText(r)}</b> <span class="badge wait">Müdür Onayı</span></div><div class="approval-meta">${dateText(r)}${r.note?" • Sebep: "+escapeHtml(r.note):""}</div></div><div class="approval-actions"><button class="btn btn-danger" onclick="decide('${r.id}','Reddedildi')">Reddet</button><button class="btn btn-ok" onclick="decide('${r.id}','Onaylandı')">Onayla</button></div></div>`).join("") || '<div class="card" style="color:#2e7d32"><b>✓ İşlem bekleyen izin / görev talebi bulunmuyor.</b></div>';
   if(currentApprovalSection==="approved")renderApprovedPeople();
 }
-async function decide(id,status){try{await rpc("mars_manager_decide",{p_token:sessionToken,p_request_id:id,p_status:status});await refreshAll()}catch(e){alert(e.message)}}
-function approvalDateText(r){if(!r.decisionAt)return"—";const d=new Date(r.decisionAt);return isNaN(d)?"—":d.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+async function decide(id,status){
+  try{
+    await rpc("mars_manager_decide",{p_token:sessionToken,p_request_id:id,p_status:status});
+    await refreshAll();
+    alert(status==="Onaylandı"?"İzin / görev onaylandı. İnsan Kaynaklarına bilgi iletildi.":"Talep reddedildi.");
+  }catch(e){alert(e.message)}
+}
+async function hrDecide(){alert("İnsan Kaynakları izin onay mercii değildir. Nihai karar bağlı müdür tarafından verilir.")}
+function approvalDateText(r){
+  const value=r.managerDecisionAt||r.decisionAt;if(!value)return"—";const d=new Date(value);return isNaN(d)?"—":d.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+}
 function renderApprovedPeople(){
-  if(!isManager())return;
+  if(!isLeader())return;
   const list=managerApprovedRequests(),g={};list.forEach(r=>(g[r.user]??=[]).push(r));
-  el("approvedPeopleList").innerHTML=Object.entries(g).map(([username,rs])=>{const u=users.find(x=>x.username===username)||{name:rs[0].name,department:rs[0].department};const annual=rs.filter(r=>r.type==="Yıllık Ücretli İzin").reduce((a,b)=>a+Number(b.durationDays||0),0),hrs=rs.filter(r=>r.type==="Saatlik İzin").reduce((a,b)=>a+Number(b.durationHours||0),0);return `<div class="approved-person-card" onclick="openApprovedEmployeeHistory('${username}')"><div class="approved-person-name">${u.name}</div><div class="approved-person-meta">${u.department||""}</div><div class="approved-person-stats"><div class="approved-person-stat">Onaylı Kayıt<b>${rs.length}</b></div><div class="approved-person-stat">Yıllık İzin<b>${formatWorkDays(annual)}</b></div><div class="approved-person-stat">Saatlik<b>${formatHours(hrs)}</b></div></div></div>`}).join("")||'<div class="card" style="grid-column:1/-1">Henüz onaylanmış izin kaydı bulunmuyor.</div>';
+  el("approvedPeopleList").innerHTML=Object.entries(g).map(([username,rs])=>{
+    const u=users.find(x=>x.username===username)||{name:rs[0].name,department:rs[0].department};
+    const approved=rs.filter(r=>r.status==="Onaylandı").length;
+    const rejected=rs.filter(r=>r.status==="Reddedildi").length;
+    return `<div class="approved-person-card" onclick="openApprovedEmployeeHistory('${username}')"><div class="approved-person-name">${escapeHtml(u.name)}</div><div class="approved-person-meta">${escapeHtml(u.department||"")}</div><div class="approved-person-stats"><div class="approved-person-stat">Karar Verilen<b>${rs.length}</b></div><div class="approved-person-stat">Onay<b>${approved}</b></div><div class="approved-person-stat">Red<b>${rejected}</b></div></div></div>`;
+  }).join("")||'<div class="card" style="grid-column:1/-1">Henüz sonuçlanan kayıt bulunmuyor.</div>';
 }
 function openApprovedEmployeeHistory(username){
-  const rs=managerApprovedRequests().filter(r=>r.user===username).sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||""))),u=users.find(x=>x.username===username)||{name:rs[0]?.name||username,department:""};
-  el("modalTitle").textContent=`${u.name} — Onaylanmış İzinler`;
-  el("modalContent").innerHTML=`<div class="table-wrap" style="margin-top:14px"><table class="history-table"><thead><tr><th>İzin Türü</th><th>İzin Tarihi / Saati</th><th>Süre</th><th>Sebep / Açıklama</th><th>Onay Tarihi - Saati</th><th>İşlem</th></tr></thead><tbody>${rs.map(r=>`<tr><td><b>${r.type}</b></td><td>${dateText(r)}</td><td>${durationText(r)}</td><td class="history-note">${r.note||"Açıklama girilmemiş"}</td><td>${approvalDateText(r)}</td><td><button class="revoke-btn" onclick="revokeApproval('${r.id}')">Onayı Geri Çek</button></td></tr>`).join("")}</tbody></table></div>`;
+  const rs=managerApprovedRequests().filter(r=>r.user===username).sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  const u=users.find(x=>x.username===username)||{name:rs[0]?.name||username,department:""};
+  el("modalTitle").textContent=`${u.name} — Onay Geçmişi`;
+  el("modalContent").innerHTML=`<div class="table-wrap" style="margin-top:14px"><table class="history-table"><thead><tr><th>Tür</th><th>Tarih</th><th>Süre</th><th>Durum</th><th>Müdür Kararı</th></tr></thead><tbody>${rs.map(r=>`<tr><td><b>${escapeHtml(r.type)}</b></td><td>${dateText(r)}</td><td>${durationText(r)}</td><td>${statusBadge(r.status)}</td><td>${formatDecisionDate(r.managerDecisionAt||r.decisionAt)}</td></tr>`).join("")}</tbody></table></div>`;
   el("detailModal").classList.remove("hidden");
 }
-async function revokeApproval(id){if(!confirm("Verilmiş müdür onayını geri çekmek istediğinize emin misiniz?"))return;try{await rpc("mars_revoke_approval",{p_token:sessionToken,p_request_id:id});closeModal();await refreshAll();alert("Onay geri çekildi. Personel artık talebi kendi hesabından geri çekebilir.")}catch(e){alert(e.message)}}
+function formatDecisionDate(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+async function revokeApproval(id){
+  if(!confirm("Onayı geri çekmek istediğinize emin misiniz? Personel daha sonra talebi geri çekebilir."))return;
+  try{await rpc("mars_revoke_approval",{p_token:sessionToken,p_request_id:id});closeModal();await refreshAll();alert("Müdür onayı geri çekildi.")}catch(e){alert(e.message)}
+}
 
 /* ---------------- Team ---------------- */
 function effectiveTeamRecord(r){
@@ -2657,7 +2834,7 @@ function renderTeamTimeline(){
   }).join("");
 }
 function renderTeam(){
-  if(!isLeader())return;
+  if(!(isLeader()||isHr()))return;
   const body=el("teamBody");if(!body)return;
 
   // users already contains Kahtan + his team; manager is intentionally included in V20.
@@ -2667,7 +2844,7 @@ function renderTeam(){
     const annual=effective.filter(r=>r.type==="Yıllık Ücretli İzin").reduce((a,b)=>a+Number(b.durationDays||0),0);
     const hrs=effective.filter(r=>r.type==="Saatlik İzin").reduce((a,b)=>a+Number(b.durationHours||0),0);
     const duties=rs.filter(r=>isDutyRecordType(r.type));
-    const pending=rs.filter(r=>r.status==="Bekliyor"&&r.manager===currentUser.username).length;
+    const pending=isLeader()?rs.filter(r=>r.status==="Bekliyor"&&r.manager===currentUser.username).length:0;
     const roleBadge=u.role==="general_manager"
       ?' <span class="badge ok">Genel Müdür</span>'
       :(u.role==="manager"?' <span class="badge ok">Yurt Dışı Satış Müdürü</span>':"");
@@ -2687,6 +2864,99 @@ function renderTeam(){
   setupTeamTimelineYear();
   setupTeamTimelinePeople();
   renderTeamTimeline();
+}
+
+
+/* ---------------- V23.7 Manual Attendance ---------------- */
+function setManualEntryDefaults(){
+  const d=el("manualEntryDate"),t=el("manualEntryTime");
+  const now=new Date();
+  if(d&&!d.value)d.value=localIsoDate(now);
+  if(t&&!t.value)t.value=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+}
+function manualStatusBadge(s){
+  const cls=s==="Onaylandı"?"ok":(s==="Reddedildi"?"bad":"wait");
+  return `<span class="badge ${cls}">${escapeHtml(s)}</span>`;
+}
+async function submitManualEntry(){
+  try{
+    const d=el("manualEntryDate")?.value,t=el("manualEntryTime")?.value,n=el("manualEntryNote")?.value||"";
+    if(!d||!t){alert("Lütfen gün ve saat seçin.");return}
+    const res=await rpc("mars_create_manual_entry",{p_token:sessionToken,p_entry_date:d,p_entry_time:t,p_note:n});
+    if(el("manualEntryNote"))el("manualEntryNote").value="";
+    await refreshAll();
+    alert(res.status==="Onaylandı"?"Manuel giriş kaydı sisteme işlendi ve İK'ya bilgi verildi.":"Manuel giriş kaydı müdür onayına gönderildi.");
+  }catch(e){alert("Manuel giriş oluşturulamadı: "+e.message)}
+}
+function renderManualEntryOwn(){
+  const body=el("manualEntryOwnBody");if(!body||!currentUser)return;
+  const list=manualEntries.filter(x=>x.user===currentUser.username).sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  body.innerHTML=list.map(x=>`<tr><td>${formatTrDate(x.date)}</td><td>${String(x.time||"").slice(0,5)}</td><td>${escapeHtml(x.note||"—")}</td><td>${manualStatusBadge(x.status)}</td><td>${formatDecisionDate(x.managerDecisionAt)}</td></tr>`).join("")||'<tr><td colspan="5" class="muted">Henüz manuel giriş kaydınız bulunmuyor.</td></tr>';
+}
+function renderManualApprovals(){
+  if(!isLeader())return;
+  const host=el("manualApprovalList"),body=el("manualApprovedBody");if(!host||!body)return;
+  const pending=pendingManualApprovalRequests().sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  host.innerHTML=pending.map(x=>`<div class="v237-row"><div><b>${escapeHtml(x.name)}</b><small>${escapeHtml(x.department||"")}</small></div><div><b>${formatTrDate(x.date)}</b><small>${String(x.time||"").slice(0,5)}</small></div><div>${escapeHtml(x.note||"Kartımı unuttum")}</div><div>${manualStatusBadge(x.status)}</div><div class="v237-actions"><button class="btn btn-danger" onclick="decideManualEntry('${x.id}','Reddedildi')">Reddet</button><button class="btn btn-ok" onclick="decideManualEntry('${x.id}','Onaylandı')">Evet, Buradaydı</button></div></div>`).join("")||'<div class="card" style="color:#2e7d32"><b>✓ Bekleyen manuel giriş bulunmuyor.</b></div>';
+  const done=manualEntries.filter(x=>x.manager===currentUser.username&&x.status!=="Müdür Onayı Bekliyor").sort((a,b)=>String(b.managerDecisionAt||b.createdAt||"").localeCompare(String(a.managerDecisionAt||a.createdAt||""))).slice(0,50);
+  body.innerHTML=done.map(x=>`<tr><td><b>${escapeHtml(x.name)}</b></td><td>${formatTrDate(x.date)}</td><td>${String(x.time||"").slice(0,5)}</td><td>${manualStatusBadge(x.status)}</td><td>${formatDecisionDate(x.managerDecisionAt)}</td></tr>`).join("")||'<tr><td colspan="5" class="muted">Sonuçlanan manuel giriş bulunmuyor.</td></tr>';
+}
+async function decideManualEntry(id,status){
+  try{
+    await rpc("mars_manager_decide_manual_entry",{p_token:sessionToken,p_entry_id:id,p_status:status});
+    await refreshAll();
+    alert(status==="Onaylandı"?"Personelin manuel girişi doğrulandı ve İnsan Kaynaklarına bilgi verildi.":"Manuel giriş reddedildi.");
+  }catch(e){alert(e.message)}
+}
+function renderHrManualEntries(){
+  const body=el("hrManualBody");if(!body||!isHr())return;
+  const list=[...manualEntries].sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  body.innerHTML=list.map(x=>`<tr><td><b>${escapeHtml(x.name)}</b></td><td>${escapeHtml(x.department||"—")}</td><td>${formatTrDate(x.date)}</td><td>${String(x.time||"").slice(0,5)}</td><td>${escapeHtml(x.note||"—")}</td><td>${manualStatusBadge(x.status)}</td><td>${formatDecisionDate(x.managerDecisionAt)}</td></tr>`).join("")||'<tr><td colspan="7" class="muted">Henüz manuel giriş kaydı bulunmuyor.</td></tr>';
+}
+function renderHrLeaveInfo(){
+  const body=el("hrLeaveInfoBody");if(!body||!isHr())return;
+  const list=requests.filter(r=>["Onaylandı","Reddedildi","Bildirildi","Onay Geri Çekildi","Geri Çekildi"].includes(r.status)).sort((a,b)=>String(b.managerDecisionAt||b.decisionAt||b.createdAt||"").localeCompare(String(a.managerDecisionAt||a.decisionAt||a.createdAt||"")));
+  body.innerHTML=list.map(r=>`<tr><td><b>${escapeHtml(r.name)}</b><div class="muted" style="font-size:11px">${escapeHtml(r.department||"")}</div></td><td>${escapeHtml(r.type)}</td><td>${dateText(r)}</td><td>${durationText(r)}</td><td>${statusBadge(r.status)}</td><td>${formatDecisionDate(r.managerDecisionAt||r.decisionAt)}</td></tr>`).join("")||'<tr><td colspan="6" class="muted">Henüz sonuçlanan kayıt bulunmuyor.</td></tr>';
+}
+function formatTrDate(v){if(!v)return"—";const p=String(v).slice(0,10).split("-");return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:String(v)}
+
+/* ---------------- V23.7 Confidential Performance ---------------- */
+function performanceDirectTargets(){
+  if(!isLeader())return [];
+  return users.filter(u=>u.username!==currentUser.username&&u.manager===currentUser.username&&u.role!=="hr");
+}
+function renderPerformance(){
+  const targetsHost=el("performanceTargets"),body=el("performanceBody"),sub=el("performanceListSubtitle");
+  if(!targetsHost||!body||!isLeader())return;
+  const targets=performanceDirectTargets();
+  targetsHost.innerHTML=targets.map(u=>{
+    const latest=performanceReviews.filter(r=>r.employee===u.username).sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")))[0];
+    return `<button class="performance-target" onclick="openPerformanceReview('${u.username}')"><b>${escapeHtml(u.name)}</b><small>${escapeHtml(u.department||"")}</small><div style="margin-top:10px">${latest?`Son değerlendirme: <span class="performance-score">${latest.score}/5</span> • ${escapeHtml(latest.period)}`:'Henüz değerlendirme yok'}</div></button>`;
+  }).join("")||'<div class="card" style="grid-column:1/-1">Doğrudan bağlı değerlendirilecek personel bulunmuyor.</div>';
+  const list=[...performanceReviews].sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")));
+  if(sub)sub.textContent=isGeneralManager()?"Genel Müdür tüm müdürlerin değerlendirmelerini görebilir.":"Yalnız sizin oluşturduğunuz değerlendirmeler gösterilir.";
+  body.innerHTML=list.map(r=>`<tr><td><b>${escapeHtml(r.employeeName)}</b><div class="muted" style="font-size:11px">${escapeHtml(r.department||"")}</div></td><td>${escapeHtml(r.period)}</td><td><span class="performance-score">${r.score}/5</span></td><td>${escapeHtml(r.evaluatorName||r.evaluator)}</td><td><button class="team-link" onclick="openPerformanceDetail('${r.id}')">Görüntüle</button></td><td>${formatDecisionDate(r.updatedAt)}</td></tr>`).join("")||'<tr><td colspan="6" class="muted">Henüz performans değerlendirmesi bulunmuyor.</td></tr>';
+}
+function openPerformanceReview(username){
+  const u=users.find(x=>x.username===username);if(!u)return;
+  if(u.manager!==currentUser.username){alert("Yalnız doğrudan bağlı personeliniz için değerlendirme oluşturabilirsiniz.");return}
+  const now=new Date(),quarter=Math.floor(now.getMonth()/3)+1,defPeriod=`${now.getFullYear()} Q${quarter}`;
+  const latest=performanceReviews.filter(r=>r.employee===username).sort((a,b)=>String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")))[0];
+  el("modalTitle").textContent=`${u.name} — Gizli Performans Değerlendirmesi`;
+  el("modalContent").innerHTML=`<div class="privacy-chip">🔒 Bu değerlendirme personele gösterilmez.</div><div class="v237-form-grid"><div><label>Dönem</label><input id="perfPeriod" value="${escapeHtml(latest?.period||defPeriod)}"></div><div><label>Genel Puan (1-5)</label><select id="perfScore">${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(latest?.score||4)===n?'selected':''}>${n}</option>`).join('')}</select></div><div class="wide"><label>Genel Değerlendirme</label><textarea id="perfNote">${escapeHtml(latest?.reviewNote||"")}</textarea></div><div class="wide"><label>Güçlü Yönler</label><textarea id="perfStrengths">${escapeHtml(latest?.strengths||"")}</textarea></div><div class="wide"><label>Gelişim Alanları</label><textarea id="perfDevelopment">${escapeHtml(latest?.developmentAreas||"")}</textarea></div></div><div class="form-actions"><button class="btn btn-primary" onclick="savePerformanceReview('${username}')">Değerlendirmeyi Kaydet</button></div>`;
+  el("detailModal").classList.remove("hidden");
+}
+async function savePerformanceReview(username){
+  try{
+    await rpc("mars_save_performance_review",{p_token:sessionToken,p_employee_username:username,p_period:el("perfPeriod").value,p_score:Number(el("perfScore").value),p_review_note:el("perfNote").value,p_strengths:el("perfStrengths").value,p_development_areas:el("perfDevelopment").value});
+    closeModal();await refreshAll();showPage("performance");alert("Performans değerlendirmesi kaydedildi. Personel bu kaydı göremez.");
+  }catch(e){alert(e.message)}
+}
+function openPerformanceDetail(id){
+  const r=performanceReviews.find(x=>String(x.id)===String(id));if(!r)return;
+  el("modalTitle").textContent=`${r.employeeName} — ${r.period}`;
+  el("modalContent").innerHTML=`<div class="privacy-chip">🔒 Personelden Gizli Yönetici Kaydı</div><div class="card" style="margin-top:12px"><b>Puan: ${r.score}/5</b><p><b>Değerlendiren:</b> ${escapeHtml(r.evaluatorName||r.evaluator)}</p><p><b>Genel Değerlendirme:</b><br>${escapeHtml(r.reviewNote||"—")}</p><p><b>Güçlü Yönler:</b><br>${escapeHtml(r.strengths||"—")}</p><p><b>Gelişim Alanları:</b><br>${escapeHtml(r.developmentAreas||"—")}</p></div>`;
+  el("detailModal").classList.remove("hidden");
 }
 
 /* ---------------- User management ---------------- */
@@ -2724,6 +2994,6 @@ function closeModal(){el("detailModal").classList.add("hidden")}
 
 window.addEventListener("load",init);
 </script>
-<!-- V23.4 ROLE MENU / MY LEAVES / HR ANNOUNCEMENTS -->
+<!-- V23.7 MANAGER FINAL APPROVAL + HR INFORMATION + PERFORMANCE + MANUAL ATTENDANCE -->
 </body>
 </html>
